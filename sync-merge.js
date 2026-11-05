@@ -123,6 +123,16 @@
     return { ...winner, type: resolveType(winner.type, changes) };
   }
 
+  // One highlight per day; the newest change wins. Clearing one keeps an empty record,
+  // so an older copy on another device can't bring the text back.
+  function mergeHighlights(local, remote) {
+    const merged = { ...(remote.highlights || {}) };
+    for (const [date, item] of Object.entries(local.highlights || {})) {
+      if (!merged[date] || stamp(item) > stamp(merged[date])) merged[date] = item;
+    }
+    return merged;
+  }
+
   function mergeStates(local, remote) {
     local = local || {};
     remote = remote || {};
@@ -138,6 +148,7 @@
       typeChanges,
       typeOrder,
       timer: mergeTimer(local, remote, typeChanges),
+      highlights: mergeHighlights(local, remote),
     };
   }
 

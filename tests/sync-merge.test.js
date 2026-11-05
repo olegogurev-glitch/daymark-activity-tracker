@@ -163,3 +163,22 @@ test('canonical ignores set order but sees real differences', () => {
   assert.equal(canonical({ deletedIds: ['a', 'b'] }), canonical({ deletedIds: ['b', 'a'] }));
   assert.notEqual(canonical({ types: [['a'], ['b']] }), canonical({ types: [['b'], ['a']] }));
 });
+
+test('the newest highlight for a day wins, and other days are kept', () => {
+  const local = { highlights: { '2026-11-05': { text: 'новое', updatedAt: 200 }, '2026-11-04': { text: 'вчера', updatedAt: 50 } } };
+  const remote = { highlights: { '2026-11-05': { text: 'старое', updatedAt: 100 }, '2026-11-03': { text: 'раньше', updatedAt: 40 } } };
+  const merged = mergeStates(local, remote).highlights;
+  assert.equal(merged['2026-11-05'].text, 'новое');
+  assert.equal(merged['2026-11-04'].text, 'вчера');
+  assert.equal(merged['2026-11-03'].text, 'раньше');
+  assert.equal(mergeStates({ highlights: { d: { text: 'старое', updatedAt: 100 } } }, { highlights: { d: { text: 'новое', updatedAt: 200 } } }).highlights.d.text, 'новое');
+});
+
+test('a cleared highlight stays cleared against an older copy', () => {
+  const merged = mergeStates({ highlights: { d: { text: 'старое', updatedAt: 100 } } }, { highlights: { d: { text: '', updatedAt: 200 } } });
+  assert.equal(merged.highlights.d.text, '');
+});
+
+test('data without highlights merges to an empty set', () => {
+  assert.deepEqual(mergeStates({}, null).highlights, {});
+});
