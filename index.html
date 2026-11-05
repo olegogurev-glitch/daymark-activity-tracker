@@ -73,13 +73,14 @@ body{background:radial-gradient(ellipse at 4% 0%,#f3d9e2 0,transparent 32%),radi
 .pattern-day{background:#f3f1f8;color:#77748a}.pattern-day b{color:#4d4a60}.pattern-day.active{background:color-mix(in srgb,var(--activity-color) 22%,white);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--activity-color) 42%,white)}.pattern-copy{color:#68667c}
 @media(max-width:580px){.mark{width:44px;height:44px;flex-basis:44px}}
 #syncBtn.sync-error{border-color:#d98aa0;color:#a55672}
+.sync-email{margin-top:14px}.sync-email summary{cursor:pointer;font-size:11px;font-weight:600;color:#66637f}.sync-email .sync-help{margin:8px 0 10px}.sync-pin{border-top:1px solid #eee5d8;margin-top:16px;padding-top:14px}.sync-pin .sync-help{margin:0 0 10px}
 
 </style>
 </head>
 <body>
 <div class="shell">
 <header class="top"><div class="brand"><div class="mark"><img src="clock-logo-pastel.png" alt=""></div><div class="brandname">мой день</div></div><div class="topright"><span class="savehint" id="saveHint">Данные хранятся на этом устройстве</span><button class="btn" id="syncBtn">Синхронизация</button><button class="btn" id="importBtn">Импорт</button><button class="btn" id="exportBtn">Экспорт данных</button><input type="file" id="importFile" accept="application/json,.json" hidden></div></header>
-<dialog class="sync-dialog" id="syncDialog"><div class="sync-head"><div><h2>Синхронизация между устройствами</h2><p>Войдите в свой аккаунт с компьютера и телефона — записи появятся на обоих устройствах.</p></div><button class="sync-close" id="syncClose" aria-label="Закрыть">×</button></div><div class="sync-status" id="syncStatus">Облако подключено.</div><div class="sync-section"><p class="sync-help">Подключение настроено. Для доступа с другого устройства войдите в тот же аккаунт. Записи и заметки отправляются в облако только после вашего подтверждения.</p></div><div id="authSection" class="sync-section sync-hidden"><h3>Войти или создать аккаунт</h3><div class="sync-field"><label for="syncEmail">Электронная почта</label><input id="syncEmail" type="email" autocomplete="email" placeholder="name@example.com"></div><div class="sync-buttons"><button class="btn primary" id="sendLink">Получить ссылку для входа</button></div><p class="sync-help" id="authHelp">Отправим на почту одноразовую ссылку для входа. Пароль придумывать не нужно.</p></div><div id="signedInSection" class="sync-section sync-hidden"><h3>Синхронизация включена</h3><p class="sync-account" id="syncAccount"></p><div class="sync-buttons"><button class="btn primary" id="syncNow">Синхронизировать сейчас</button><button class="btn" id="signOut">Выйти</button></div></div></dialog>
+<dialog class="sync-dialog" id="syncDialog"><div class="sync-head"><div><h2>Синхронизация между устройствами</h2><p>Войдите в свой аккаунт с компьютера и телефона — записи появятся на обоих устройствах.</p></div><button class="sync-close" id="syncClose" aria-label="Закрыть">×</button></div><div class="sync-status" id="syncStatus">Облако подключено.</div><div class="sync-section"><p class="sync-help">Подключение настроено. Для доступа с другого устройства войдите в тот же аккаунт. Записи и заметки отправляются в облако только после вашего подтверждения.</p></div><div id="authSection" class="sync-section sync-hidden"><h3>Войти или создать аккаунт</h3><div class="sync-field"><label for="pinLogin">Логин</label><input id="pinLogin" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="30" placeholder="Например, oleg"></div><div class="sync-field"><label for="pinCode">PIN из 4 цифр</label><input id="pinCode" type="password" inputmode="numeric" autocomplete="current-password" maxlength="4" placeholder="••••"></div><div class="sync-buttons"><button class="btn primary" id="pinSignIn">Войти</button><button class="btn" id="pinSignUp">Создать аккаунт</button></div><p class="sync-help">Логин: от 3 символов, без пробелов. Простые PIN вроде 1234 или 1111 не подойдут. После 5 неверных попыток вход временно блокируется.</p><details class="sync-email"><summary>Войти по ссылке на почту</summary><p class="sync-help">Если у вас уже есть аккаунт с почтой или вы забыли PIN. После входа можно задать новый PIN.</p><div class="sync-field"><label for="syncEmail">Электронная почта</label><input id="syncEmail" type="email" autocomplete="email" placeholder="name@example.com"></div><div class="sync-buttons"><button class="btn" id="sendLink">Получить ссылку для входа</button></div></details></div><div id="signedInSection" class="sync-section sync-hidden"><h3>Синхронизация включена</h3><p class="sync-account" id="syncAccount"></p><div class="sync-buttons"><button class="btn primary" id="syncNow">Синхронизировать сейчас</button><button class="btn" id="signOut">Выйти</button></div><div class="sync-pin"><h3 id="pinSetupTitle">Логин и PIN</h3><p class="sync-help" id="pinSetupHelp"></p><div class="sync-field"><label for="newPinLogin">Логин</label><input id="newPinLogin" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="30"></div><div class="sync-field"><label for="newPinCode">Новый PIN из 4 цифр</label><input id="newPinCode" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" placeholder="••••"></div><div class="sync-buttons"><button class="btn" id="savePin">Сохранить</button></div></div></div></dialog>
 <div class="hero"><div><div class="eyebrow">Маленькие шаги — тоже дела!</div><h1 id="greeting">Чем сегодня займёмся?</h1></div><div class="date-nav"><button class="iconbtn" id="prevDay" aria-label="Предыдущий день">‹</button><div class="date-display" id="dateDisplay"></div><button class="iconbtn" id="nextDay" aria-label="Следующий день">›</button><button class="btn" id="todayBtn">Сегодня</button></div></div>
 <div class="layout"><main>
 <section class="card entry"><div class="edit-banner" id="editBanner">Редактирование занятия <button type="button" id="cancelEdit">Отменить</button></div><h2 class="cardtitle" id="entryTitle">Добавить занятие</h2><p class="sub">Выберите занятие — и готово, дело записано!</p><label class="label">ЧЕМ ВЫ ЗАНИМАЛИСЬ?</label><div class="activity-grid" id="activityGrid"></div>
@@ -195,7 +196,9 @@ window.addEventListener('focus',syncIfStale);window.addEventListener('online',sy
 function initializeCloud(){if(sb)return true;if(!window.supabase?.createClient){setSyncStatus('Не удалось загрузить библиотеку синхронизации. Проверьте подключение к интернету.');return false}sb=window.supabase.createClient(SYNC_URL,SYNC_KEY);$('#authSection').classList.remove('sync-hidden');sb.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>updateCloudUI(session),0)});return true}
 function updateCloudUI(session){
  if(session){
-  $('#signedInSection').classList.remove('sync-hidden');$('#syncAccount').textContent=`Вы вошли как ${session.user.email}.`;$('#authSection').classList.add('sync-hidden');
+  const login=session.user.user_metadata?.login||'',placeholder=session.user.email?.endsWith('@login.daymark.invalid');
+  $('#signedInSection').classList.remove('sync-hidden');$('#syncAccount').textContent=`Вы вошли как ${login&&placeholder?login:session.user.email}.`;$('#authSection').classList.add('sync-hidden');
+  $('#newPinLogin').value=login;$('#pinSetupHelp').textContent=login?'Здесь можно сменить логин или PIN.':'Задайте логин и PIN, чтобы входить без письма на почту.';
   if(syncedUser!==session.user.id){syncedUser=session.user.id;setSyncStatus('Аккаунт подключён. Проверяем синхронизацию…');syncCloud(false)}
  }else{
   clearTimeout(syncTimer);syncTimer=null;syncedUser=null;consentDeclined=false;
@@ -205,6 +208,31 @@ function updateCloudUI(session){
 }
 $('#syncBtn').onclick=()=>{initializeCloud();syncDialog.showModal()};$('#syncClose').onclick=()=>syncDialog.close();syncDialog.addEventListener('click',e=>{if(e.target===syncDialog)syncDialog.close()});
 $('#sendLink').onclick=async()=>{if(!sb){setSyncStatus('Подключение пока не готово. Обновите страницу и попробуйте снова.');return}let email=$('#syncEmail').value.trim();if(!email){setSyncStatus('Сначала укажите электронную почту.');$('#syncEmail').focus();return}setSyncStatus('Отправляем ссылку…');let redirect=location.origin+location.pathname.replace(/index\.html$/,'');let {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:redirect}});if(error){setSyncStatus('Не удалось отправить письмо: '+error.message);return}setSyncStatus('Письмо со ссылкой для входа отправлено на '+email+'. Откройте его на этом устройстве.')};
+const PIN_ERRORS={invalid:'Неверный логин или PIN.',bad_login:'Логин: от 3 до 30 символов, буквы и цифры, без пробелов.',weak_pin:'Нужен PIN из 4 цифр. Простые вроде 1234, 1111 или 1212 не подойдут.',login_taken:'Такой логин уже занят.',too_many_signups:'Сейчас создаётся слишком много аккаунтов. Попробуйте через час.',not_signed_in:'Сначала войдите в аккаунт.'};
+function pinErrorText(result){return result.error==='locked'?`Слишком много неверных попыток. Попробуйте через ${Math.max(1,Math.ceil(result.retry_after/60))} мин.`:PIN_ERRORS[result.error]||'Вход по PIN сейчас недоступен. Попробуйте позже или войдите по ссылке на почту.'}
+async function pinRequest(body){const {data,error}=await sb.functions.invoke('pin-auth',{body});return error?{ok:false,error:'server'}:data}
+async function pinAuth(action){
+ if(!sb){setSyncStatus('Подключение пока не готово. Обновите страницу и попробуйте снова.');return}
+ const login=$('#pinLogin').value.trim(),pin=$('#pinCode').value.trim();
+ if(!login||!pin){setSyncStatus('Введите логин и PIN.');return}
+ setSyncStatus(action==='signup'?'Создаём аккаунт…':'Входим…');
+ const result=await pinRequest({action,login,pin});
+ if(!result?.ok){setSyncStatus(pinErrorText(result||{}));return}
+ const {error}=await sb.auth.verifyOtp({token_hash:result.token_hash,type:'magiclink'});
+ if(error){setSyncStatus('Не удалось войти: '+error.message);return}
+ $('#pinCode').value='';
+}
+$('#pinSignIn').onclick=()=>pinAuth('signin');$('#pinSignUp').onclick=()=>pinAuth('signup');$('#pinCode').onkeydown=e=>{if(e.key==='Enter')pinAuth('signin')};
+$('#savePin').onclick=async()=>{
+ const login=$('#newPinLogin').value.trim(),pin=$('#newPinCode').value.trim();
+ if(!login||!pin){setSyncStatus('Введите логин и новый PIN.');return}
+ setSyncStatus('Сохраняем…');
+ const result=await pinRequest({action:'set_pin',login,pin});
+ if(!result?.ok){setSyncStatus(pinErrorText(result||{}));return}
+ $('#newPinCode').value='';$('#newPinLogin').value=result.login;$('#pinSetupHelp').textContent='Здесь можно сменить логин или PIN.';
+ await sb.auth.refreshSession();
+ setSyncStatus('Логин и PIN сохранены. Теперь можно входить без письма.');
+};
 // Returns false if the user has not agreed to send this device's data to the cloud.
 function hasCloudConsent(userId,row,manual){
  const key='daymark-cloud-consent-'+userId;
