@@ -759,9 +759,11 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))window.add
 const APP_VERSION_FILES=['./','sync-merge.js','timer-logic.js','day-summary.js','backup-reminder.js'];
 const UPDATE_CHECK_EVERY_MS=10*60000;
 let loadedVersion=null,lastUpdateCheck=0;
+// Compares the files' actual contents, because not every host sends version headers for them.
 async function fetchAppVersion(){
- const heads=await Promise.all(APP_VERSION_FILES.map(file=>fetch(file,{method:'HEAD',cache:'no-store'}).then(r=>r.ok?r.headers.get('etag')||r.headers.get('last-modified'):null)));
- return heads.every(Boolean)?heads.join('|'):null;
+ const texts=await Promise.all(APP_VERSION_FILES.map(file=>fetch(file,{cache:'no-store'}).then(r=>r.ok?r.text():Promise.reject(new Error('bad response')))));
+ const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(texts.join('\n')));
+ return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
 }
 function canReloadNow(){const el=document.activeElement;return !document.querySelector('dialog[open]')&&!editingId&&!(el&&/INPUT|TEXTAREA|SELECT/.test(el.tagName))&&!$('#note').value.trim()}
 async function checkForUpdate(){
