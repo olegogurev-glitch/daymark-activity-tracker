@@ -4,6 +4,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2.118.0';
 import { handle } from './logic.js';
 
 const ALLOWED_ORIGINS = new Set([
+  'https://day.summershots.org',
   'https://daymark-activity-tracker.pages.dev',
   'https://olegogurev-glitch.github.io',
   'http://127.0.0.1:8765',

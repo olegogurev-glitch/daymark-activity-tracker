@@ -15,7 +15,7 @@
 
 ## Инфраструктура
 
-Сайт размещён на Cloudflare Pages: https://daymark-activity-tracker.pages.dev/ . Каждый push в `main` публикуется автоматически. Этот адрес указан в настройках Supabase (Site URL и Redirect URLs) и в списке разрешённых сайтов функции `pin-auth`; при смене адреса его нужно обновить в обоих местах.
+Сайт размещён на Cloudflare Pages: https://day.summershots.org/ . Адрес `daymark-activity-tracker.pages.dev` тоже работает, но открывается не на всех устройствах. Каждый push в `main` публикуется автоматически. Этот адрес указан в настройках Supabase (Site URL и Redirect URLs) и в списке разрешённых сайтов функции `pin-auth`; при смене адреса его нужно обновить в обоих местах.
 
 Supabase project `daymark-activity-tracker` размещён в регионе Frankfurt на Free плане. Таблица `tracker_data` доступна только аутентифицированному владельцу строки. SQL для создания таблицы и политик хранится в `supabase-setup.sql`.
 
