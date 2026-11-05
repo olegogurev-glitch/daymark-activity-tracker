@@ -114,6 +114,15 @@
     return { updatedAt: stamp(winner), names };
   }
 
+  // The timer is one record: its newest state wins, whichever device changed it.
+  function mergeTimer(local, remote, changes) {
+    const l = local.timer || null;
+    const r = remote.timer || null;
+    const winner = l && (!r || stamp(l) > stamp(r)) ? l : r;
+    if (!winner || winner.stopped) return winner;
+    return { ...winner, type: resolveType(winner.type, changes) };
+  }
+
   function mergeStates(local, remote) {
     local = local || {};
     remote = remote || {};
@@ -128,6 +137,7 @@
       deletedTypes: Object.keys(typeChanges).filter((name) => typeChanges[name].deleted),
       typeChanges,
       typeOrder,
+      timer: mergeTimer(local, remote, typeChanges),
     };
   }
 
