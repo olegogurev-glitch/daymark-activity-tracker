@@ -5,6 +5,7 @@
 // null means it is still running.
 (function (root) {
   const MIN_ACTIVE_MS = 30000;
+  const MAX_OVERNIGHT_MINUTES = 720;
   const pad = (n) => String(n).padStart(2, '0');
   const dayKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const clock = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -76,7 +77,39 @@
     return entries;
   }
 
-  const api = { isRunning, totals, toEntries, MIN_ACTIVE_MS };
+  const toMinutes = (text) => Number(text.slice(0, 2)) * 60 + Number(text.slice(3));
+  const toClock = (minutes) => `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
+
+  // Manual entry: an end before the start means the next day, split into one entry per day.
+  // Over 12 hours is far more likely a typo (10:00 to 09:00) than a real night, so it's refused.
+  function manualEntries(date, start, end) {
+    if (!/^\d{2}:\d{2}$/.test(start) || !/^\d{2}:\d{2}$/.test(end)) return null;
+    const from = toMinutes(start);
+    const to = toMinutes(end);
+    if (to > from) return [{ date, start, end, minutes: to - from }];
+    const overnight = 1440 - from + to;
+    if (to === from || overnight > MAX_OVERNIGHT_MINUTES) return null;
+    const [y, m, d] = date.split('-').map(Number);
+    const parts = [{ date, start, end: '23:59', minutes: 1440 - from }];
+    if (to > 0) parts.push({ date: dayKey(new Date(y, m - 1, d + 1)), start: '00:00', end, minutes: to });
+    return parts;
+  }
+
+  // Manual entry records what just happened: the hour ending now, on a 5-minute mark.
+  function defaultTimes(now) {
+    const current = now.getHours() * 60 + now.getMinutes();
+    const end = Math.max(current - current % 5, 5);
+    return { start: toClock(Math.max(end - 60, 0)), end: toClock(end) };
+  }
+
+  // The next entry usually follows on from the one just added.
+  function followingTimes(previousEnd, now) {
+    const start = toMinutes(previousEnd);
+    if (start >= 1439) return defaultTimes(now);
+    return { start: previousEnd, end: toClock(Math.min(start + 60, 1439)) };
+  }
+
+  const api = { isRunning, totals, toEntries, manualEntries, defaultTimes, followingTimes, MIN_ACTIVE_MS };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.TimerLogic = api;
 })(typeof window !== 'undefined' ? window : globalThis);

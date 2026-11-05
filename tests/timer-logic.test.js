@@ -1,7 +1,7 @@
 // Run with: node --test tests/
 const test = require('node:test');
 const assert = require('node:assert');
-const { isRunning, totals, toEntries } = require('../timer-logic.js');
+const { isRunning, totals, toEntries, manualEntries, defaultTimes, followingTimes } = require('../timer-logic.js');
 const { mergeStates } = require('../sync-merge.js');
 
 const at = (h, m, s = 0, day = 5) => new Date(2026, 10, day, h, m, s).getTime();
@@ -86,4 +86,46 @@ test('a running timer follows a rename from another device', () => {
   const running = { id: 't1', type: 'чтение', updatedAt: 100, segments: [{ start: 1, end: null }] };
   const cloud = { types: [['книги', '#1']], typeChanges: { 'чтение': { updatedAt: 200, deleted: true, renamedTo: 'книги' }, 'книги': { updatedAt: 200, deleted: false, color: '#1', hidden: false } } };
   assert.equal(mergeStates({ timer: running }, cloud).timer.type, 'книги');
+});
+
+test('a normal manual entry stays one entry', () => {
+  assert.deepEqual(manualEntries('2026-11-05', '09:00', '10:30'), [{ date: '2026-11-05', start: '09:00', end: '10:30', minutes: 90 }]);
+});
+
+test('an overnight manual entry splits across the two days, with the full time counted', () => {
+  assert.deepEqual(manualEntries('2026-11-05', '23:00', '01:00'), [
+    { date: '2026-11-05', start: '23:00', end: '23:59', minutes: 60 },
+    { date: '2026-11-06', start: '00:00', end: '01:00', minutes: 60 },
+  ]);
+});
+
+test('overnight entries handle the end of a month and of a year', () => {
+  assert.equal(manualEntries('2026-11-30', '23:00', '01:00')[1].date, '2026-12-01');
+  assert.equal(manualEntries('2026-12-31', '23:00', '01:00')[1].date, '2027-01-01');
+});
+
+test('ending exactly at midnight stays on the first day', () => {
+  assert.deepEqual(manualEntries('2026-11-05', '22:00', '00:00'), [{ date: '2026-11-05', start: '22:00', end: '23:59', minutes: 120 }]);
+});
+
+test('equal times, likely typos and bad values are refused', () => {
+  assert.equal(manualEntries('2026-11-05', '10:00', '10:00'), null);
+  assert.equal(manualEntries('2026-11-05', '10:00', '09:00'), null);
+  assert.equal(manualEntries('2026-11-05', '', '09:00'), null);
+  assert.ok(manualEntries('2026-11-05', '20:00', '08:00'));
+  assert.equal(manualEntries('2026-11-05', '20:00', '08:01'), null);
+});
+
+test('the form starts with the hour ending now, on a 5-minute mark', () => {
+  assert.deepEqual(defaultTimes(new Date(2026, 10, 5, 14, 37)), { start: '13:35', end: '14:35' });
+  assert.deepEqual(defaultTimes(new Date(2026, 10, 5, 0, 20)), { start: '00:00', end: '00:20' });
+  assert.deepEqual(defaultTimes(new Date(2026, 10, 5, 0, 2)), { start: '00:00', end: '00:05' });
+  assert.deepEqual(defaultTimes(new Date(2026, 10, 5, 23, 59)), { start: '22:55', end: '23:55' });
+});
+
+test('after adding, the form continues from the last end time', () => {
+  const now = new Date(2026, 10, 5, 14, 37);
+  assert.deepEqual(followingTimes('10:00', now), { start: '10:00', end: '11:00' });
+  assert.deepEqual(followingTimes('23:30', now), { start: '23:30', end: '23:59' });
+  assert.deepEqual(followingTimes('23:59', now), { start: '13:35', end: '14:35' });
 });
