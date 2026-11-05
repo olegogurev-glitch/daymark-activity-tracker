@@ -1,7 +1,7 @@
 // Run with: node --test tests/
 const test = require('node:test');
 const assert = require('node:assert');
-const { isRunning, totals, toEntries, manualEntries, defaultTimes, followingTimes } = require('../timer-logic.js');
+const { isRunning, totals, toEntries, manualEntries, defaultTimes, followingTimes, lastActivity, resolveStopTime, stoppedAt, needsCheck } = require('../timer-logic.js');
 const { mergeStates } = require('../sync-merge.js');
 
 const at = (h, m, s = 0, day = 5) => new Date(2026, 10, day, h, m, s).getTime();
@@ -128,4 +128,59 @@ test('after adding, the form continues from the last end time', () => {
   assert.deepEqual(followingTimes('10:00', now), { start: '10:00', end: '11:00' });
   assert.deepEqual(followingTimes('23:30', now), { start: '23:30', end: '23:59' });
   assert.deepEqual(followingTimes('23:59', now), { start: '13:35', end: '14:35' });
+});
+
+test('the last activity is now while running, or the moment of the pause', () => {
+  assert.equal(lastActivity(timer([{ start: at(9, 0), end: null }]), at(10, 0)), at(10, 0));
+  assert.equal(lastActivity(timer([{ start: at(9, 0), end: at(9, 30) }]), at(12, 0)), at(9, 30));
+});
+
+test('an end time means the latest such time that is not in the future', () => {
+  const t = timer([{ start: at(22, 0), end: null }]);
+  assert.equal(resolveStopTime(t, at(23, 30), '23:00'), at(23, 0));
+  assert.equal(resolveStopTime(t, at(1, 0, 0, 6), '23:15'), at(23, 15));
+  assert.equal(resolveStopTime(t, at(1, 0, 0, 6), '00:30'), at(0, 30, 0, 6));
+});
+
+test('an end time before the start, or a bad value, is refused', () => {
+  const t = timer([{ start: at(9, 0), end: null }]);
+  assert.equal(resolveStopTime(t, at(10, 0), '08:00'), null);
+  assert.equal(resolveStopTime(t, at(10, 0), '09:00'), null);
+  assert.equal(resolveStopTime(t, at(10, 0), '11:00'), null);
+  assert.equal(resolveStopTime(t, at(10, 0), ''), null);
+});
+
+test('correcting the end cuts a forgotten timer down to the real time', () => {
+  const forgotten = timer([{ start: at(9, 0), end: null }]);
+  const fixed = stoppedAt(forgotten, at(10, 0));
+  assert.deepEqual(toEntries(fixed, at(10, 0)).map((e) => [e.start, e.end, e.minutes]), [['09:00', '10:00', 60]]);
+});
+
+test('correcting the end drops stretches after it and keeps earlier pauses', () => {
+  const t = timer([{ start: at(9, 0), end: at(9, 30) }, { start: at(10, 0), end: at(11, 0) }, { start: at(12, 0), end: null }]);
+  const [entry] = toEntries(stoppedAt(t, at(10, 30)), at(10, 30));
+  assert.deepEqual([entry.start, entry.end, entry.minutes, entry.pausedMinutes], ['09:00', '10:30', 60, 30]);
+});
+
+test('a timer forgotten overnight, corrected to the evening, stays on one day', () => {
+  const t = timer([{ start: at(20, 0), end: null }]);
+  const entries = toEntries(stoppedAt(t, at(21, 0)), at(21, 0));
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].date, '2026-11-05');
+});
+
+test('"still working?" appears after 4 hours, and again 4 hours after a yes', () => {
+  const t = timer([{ start: at(8, 0), end: null }]);
+  assert.equal(needsCheck(t, at(11, 59)), false);
+  assert.equal(needsCheck(t, at(12, 0)), true);
+  const confirmed = { ...t, checkedMs: 4 * 3600000 };
+  assert.equal(needsCheck(confirmed, at(15, 59)), false);
+  assert.equal(needsCheck(confirmed, at(16, 0)), true);
+});
+
+test('a paused timer never asks, and pauses do not count towards the 4 hours', () => {
+  assert.equal(needsCheck(timer([{ start: at(8, 0), end: at(9, 0) }]), at(20, 0)), false);
+  const t = timer([{ start: at(8, 0), end: at(9, 0) }, { start: at(14, 0), end: null }]);
+  assert.equal(needsCheck(t, at(16, 0)), false);
+  assert.equal(needsCheck(t, at(17, 0)), true);
 });

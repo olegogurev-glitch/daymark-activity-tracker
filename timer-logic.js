@@ -5,6 +5,7 @@
 // null means it is still running.
 (function (root) {
   const MIN_ACTIVE_MS = 30000;
+  const CHECK_AFTER_MS = 4 * 3600000;
   const MAX_OVERNIGHT_MINUTES = 720;
   const pad = (n) => String(n).padStart(2, '0');
   const dayKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -109,7 +110,35 @@
     return { start: previousEnd, end: toClock(Math.min(start + 60, 1439)) };
   }
 
-  const api = { isRunning, totals, toEntries, manualEntries, defaultTimes, followingTimes, MIN_ACTIVE_MS };
+  // When the timer last counted: now if running, otherwise the moment it was paused.
+  function lastActivity(timer, now) {
+    return isRunning(timer) ? now : timer.segments[timer.segments.length - 1].end;
+  }
+
+  // Turns an "HH:MM" end time into a moment: the latest such time that isn't in the future.
+  // Returns null if that's before the timer started.
+  function resolveStopTime(timer, now, text) {
+    if (!/^\d{2}:\d{2}$/.test(text)) return null;
+    const moment = new Date(now);
+    moment.setHours(Number(text.slice(0, 2)), Number(text.slice(3)), 0, 0);
+    if (moment.getTime() > now) moment.setDate(moment.getDate() - 1);
+    return moment.getTime() > timer.segments[0].start ? moment.getTime() : null;
+  }
+
+  // The timer as if it had been stopped at this moment.
+  function stoppedAt(timer, stopMs) {
+    const segments = closedSegments(timer, stopMs)
+      .filter((s) => s.start < stopMs)
+      .map((s) => ({ start: s.start, end: Math.min(s.end, stopMs) }));
+    return { ...timer, segments };
+  }
+
+  // A running timer asks "still working?" after 4 hours, then 4 hours after each "yes".
+  function needsCheck(timer, now) {
+    return isRunning(timer) && totals(timer, now).activeMs - (timer.checkedMs || 0) >= CHECK_AFTER_MS;
+  }
+
+  const api = { isRunning, totals, toEntries, manualEntries, defaultTimes, followingTimes, lastActivity, resolveStopTime, stoppedAt, needsCheck, MIN_ACTIVE_MS, CHECK_AFTER_MS };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.TimerLogic = api;
 })(typeof window !== 'undefined' ? window : globalThis);

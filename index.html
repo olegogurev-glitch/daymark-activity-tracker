@@ -298,6 +298,12 @@ body.timer-bar-on .toast{bottom:92px}
 .types-card .type-item{border-color:#e0dbe9}
 .types-card .manage-hint{color:var(--ink-2)}
 
+.live-timer.needs-check .timer-state{color:#f3c6d6;font-weight:500}
+.stop-error{margin:6px 0 0;font-size:13px;color:var(--rose)}
+.stop-discard{display:block;margin:2px 0 0;padding:8px 0;border:0;background:transparent;color:var(--rose);font-size:14px;text-decoration:underline;text-underline-offset:2px}
+.backup-note{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 18px;padding:12px 16px;border:1px solid var(--line-strong);border-radius:16px;background:var(--surface);font-size:14px;font-weight:500}
+.backup-actions{display:flex;gap:8px;flex-shrink:0}
+
 /* Medium screens: one column for the day's work, two for the overview. */
 @media(max-width:980px){
  .savehint{display:none}
@@ -366,8 +372,9 @@ body.timer-bar-on .toast{bottom:92px}
 <div class="shell">
 <header class="top"><div class="brand"><div class="mark"><img src="clock-logo-pastel.png" alt=""></div><div class="brandname">мой день</div></div><div class="topright"><span class="savehint" id="saveHint">Данные хранятся на этом устройстве</span><button class="btn" id="syncBtn">Синхронизация</button><details class="more-menu" id="moreMenu"><summary class="btn" aria-label="Импорт и экспорт данных" title="Импорт и экспорт данных"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg></summary><div class="more-list"><button class="btn" id="importBtn">Импорт</button><button class="btn" id="exportBtn">Экспорт данных</button><button class="btn" id="jokesBtn"></button></div></details><input type="file" id="importFile" accept="application/json,.json" hidden></div></header>
 <dialog class="sync-dialog" id="syncDialog"><div class="sync-head"><div><h2>Синхронизация между устройствами</h2><p>Войдите в свой аккаунт с компьютера и телефона — записи появятся на обоих устройствах.</p></div><button class="sync-close" id="syncClose" aria-label="Закрыть"><svg class="ic" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="sync-status" id="syncStatus">Облако подключено.</div><div class="sync-section"><p class="sync-help">Подключение настроено. Для доступа с другого устройства войдите в тот же аккаунт. Записи и заметки отправляются в облако только после вашего подтверждения.</p></div><div id="authSection" class="sync-section sync-hidden"><h3>Войти или создать аккаунт</h3><div class="sync-field"><label for="pinLogin">Логин</label><input id="pinLogin" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="30" placeholder="Например, oleg"></div><div class="sync-field"><label for="pinCode">PIN из 4 цифр</label><input id="pinCode" type="password" inputmode="numeric" autocomplete="current-password" maxlength="4" placeholder="••••"></div><div class="sync-buttons"><button class="btn primary" id="pinSignIn">Войти</button><button class="btn" id="pinSignUp">Создать аккаунт</button></div><p class="sync-help">Логин: от 3 символов, без пробелов. Простые PIN вроде 1234 или 1111 не подойдут. После 5 неверных попыток вход временно блокируется.</p><details class="sync-email"><summary>Войти по ссылке на почту</summary><p class="sync-help">Если у вас уже есть аккаунт с почтой или вы забыли PIN. После входа можно задать новый PIN.</p><div class="sync-field"><label for="syncEmail">Электронная почта</label><input id="syncEmail" type="email" autocomplete="email" placeholder="name@example.com"></div><div class="sync-buttons"><button class="btn" id="sendLink">Получить ссылку для входа</button></div></details></div><div id="signedInSection" class="sync-section sync-hidden"><h3>Синхронизация включена</h3><p class="sync-account" id="syncAccount"></p><div class="sync-buttons"><button class="btn primary" id="syncNow">Синхронизировать сейчас</button><button class="btn" id="signOut">Выйти</button></div><div class="sync-pin"><h3 id="pinSetupTitle">Логин и PIN</h3><p class="sync-help" id="pinSetupHelp"></p><div class="sync-field"><label for="newPinLogin">Логин</label><input id="newPinLogin" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="30"></div><div class="sync-field"><label for="newPinCode">Новый PIN из 4 цифр</label><input id="newPinCode" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" placeholder="••••"></div><div class="sync-buttons"><button class="btn" id="savePin">Сохранить</button></div></div></div></dialog>
-<dialog class="sync-dialog" id="stopDialog"><div class="sync-head"><div><h2>Точно завершить занятие?</h2><p>Занятие остановится и появится в списке дня.</p></div></div><div class="stop-summary" id="stopSummary"></div><div class="sync-field"><label for="stopNote">Заметка (необязательно)</label><input id="stopNote" placeholder="Что-нибудь запомнить"></div><div class="sync-buttons"><button class="btn primary" id="stopConfirm">Да, завершить</button><button class="btn" id="stopCancel">Нет, продолжить</button></div></dialog>
+<dialog class="sync-dialog" id="stopDialog"><div class="sync-head"><div><h2>Точно завершить занятие?</h2><p>Занятие остановится и появится в списке дня.</p></div></div><div class="stop-summary" id="stopSummary"></div><div class="sync-field"><label for="stopTime">Когда закончили</label><input id="stopTime" type="time"><p class="stop-error" id="stopError" hidden>Это время раньше начала занятия.</p></div><div class="sync-field"><label for="stopNote">Заметка (необязательно)</label><input id="stopNote" placeholder="Что-нибудь запомнить"></div><div class="sync-buttons"><button class="btn primary" id="stopConfirm">Да, завершить</button><button class="btn" id="stopCancel">Нет, продолжить</button></div><button class="stop-discard" id="stopDiscard">Удалить без сохранения</button></dialog>
 <div class="hero"><div><div class="eyebrow" id="dailyPhrase">Маленькие шаги — тоже дела!</div><h1 id="greeting">Чем сегодня займёмся?</h1></div><div class="date-nav"><button class="iconbtn" id="prevDay" aria-label="Предыдущий день"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button><div class="date-display" id="dateDisplay"></div><button class="iconbtn" id="nextDay" aria-label="Следующий день"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button><button class="btn" id="todayBtn">Сегодня</button></div></div>
+<div class="backup-note" id="backupNote" hidden><span id="backupText"></span><div class="backup-actions"><button class="btn primary" id="backupNow">Скачать копию</button><button class="btn" id="backupLater">Позже</button></div></div>
 <div class="layout"><main>
 <section class="card entry"><div class="edit-banner" id="editBanner">Редактирование занятия <button type="button" id="cancelEdit">Отменить</button></div><h2 class="cardtitle" id="entryTitle">Добавить занятие</h2><div class="activity-grid" id="activityGrid"></div>
 <div class="live-timer" id="liveTimer"></div><details class="manual-entry" id="manualEntry"><summary><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg>Указать время вручную</summary><div class="manual-fields"><div class="field"><label for="start">Начало</label><input class="input" type="time" id="start" value="09:00"></div><div class="field"><label for="end">Конец</label><input class="input" type="time" id="end" value="10:00"></div><div class="field note-field"><label for="note">Заметка <span>(необязательно)</span></label><input class="input" id="note" placeholder="Что-нибудь запомнить"></div></div>
@@ -384,7 +391,7 @@ body.timer-bar-on .toast{bottom:92px}
 <section class="card calendar-card"><div class="card-head"><div><h2 class="cardtitle">Календарь</h2><div class="sub">Ваши активные дни</div></div><div class="mini-nav"><button class="iconbtn" id="calPrev" aria-label="Предыдущий месяц"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button><button class="iconbtn" id="calNext" aria-label="Следующий месяц"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button></div></div><div class="calendar-title" id="calMonth"></div><div class="calgrid" id="calendar"></div><div class="cal-legend"><span>Меньше</span><i class="cal-swatch"></i><i class="cal-swatch l2"></i><i class="cal-swatch l3"></i><span>Больше</span><span class="cal-selected-key"><i></i> Выбранный день</span></div></section>
 <section class="card types-card"><details class="types-panel"><summary><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg><h2 class="cardtitle">Мои занятия</h2><div class="sub">Добавляйте и настраивайте список</div></summary><div class="type-add"><input class="input" id="newType" placeholder="Например, прогулка" aria-label="Новое занятие"><button class="btn primary" id="addType">Добавить</button></div><p class="manage-hint">Можно переименовывать, менять порядок и скрывать ненужные занятия.</p><div class="type-list" id="typeList"></div></details></section>
 </aside></div></div><div class="timer-bar" id="timerBar"></div><div class="toast" id="toast"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script><script src="sync-merge.js"></script><script src="timer-logic.js"></script><script src="day-summary.js"></script><script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script><script src="sync-merge.js"></script><script src="timer-logic.js"></script><script src="day-summary.js"></script><script src="backup-reminder.js"></script><script>
 function readJSON(key,fallback){try{let value=JSON.parse(localStorage.getItem(key));return value===null||value===undefined?fallback:value}catch(_){return fallback}}
 const TYPES=readJSON('daymark-types-v1',null)||[['работа','#ed7771'],['психология','#95c99a'],['медитация','#efc75e'],['ходьба','#bc8ad5'],['аудиокнига','#95c99a'],['упражнения','#bc8ad5'],['рисование','#74b9d8'],['изучение языка','#efc75e'],['чтение','#95c99a'],['скакалка','#bc8ad5'],['вязание','#95c99a'],['танцы','#bc8ad5']];const HIDDEN=new Set(readJSON('daymark-hidden-types-v1',[]));
 const KEY='daymark-activities-v1', GOAL_KEY='daymark-weekly-goals-v1', DELETED_KEY='daymark-deleted-activities-v1', DELETED_TYPES_KEY='daymark-deleted-types-v1', DELETED_GOALS_KEY='daymark-deleted-goals-v1', GOAL_CHANGES_KEY='daymark-goal-changes-v1', TYPE_CHANGES_KEY='daymark-type-changes-v1', TYPE_ORDER_KEY='daymark-type-order-v1', TIMER_KEY='daymark-timer-v1', HIGHLIGHTS_KEY='daymark-highlights-v1', TYPE_COLORS=['#ed9b75','#86b9dc','#b890d2','#91bf86','#e8bf60','#e27d84'];let data=readJSON(KEY,[]),deletedIds=new Set(readJSON(DELETED_KEY,[])),deletedTypes=new Set(readJSON(DELETED_TYPES_KEY,[])),deletedGoals=new Set(readJSON(DELETED_GOALS_KEY,[])),goalChanges=readJSON(GOAL_CHANGES_KEY,{}),goals=readJSON(GOAL_KEY,{}),typeChanges=readJSON(TYPE_CHANGES_KEY,{}),typeOrder=readJSON(TYPE_ORDER_KEY,null),timer=readJSON(TIMER_KEY,null),highlights=readJSON(HIGHLIGHTS_KEY,{}),selected=TYPES[0]?.[0]||'',date=new Date(),calDate=new Date(),period='week',summaryActivity=null;date.setHours(0,0,0,0);calDate.setDate(1);
@@ -411,6 +418,13 @@ function deleteEntry(id){
 }
 function storeHighlights(){localStorage.setItem(HIGHLIGHTS_KEY,JSON.stringify(highlights))}
 const highlightOf=key=>highlights[key]?.text||'';
+const LAST_BACKUP_KEY='daymark-last-backup-v1',BACKUP_SNOOZE_KEY='daymark-backup-snooze-v1';
+function renderBackupNote(){
+ const oldest=data.reduce((first,x)=>!first||x.date<first?x.date:first,null);
+ const due=BackupReminder.reminder({lastBackup:readJSON(LAST_BACKUP_KEY,null),snoozedUntil:readJSON(BACKUP_SNOOZE_KEY,null),now:Date.now(),oldestEntry:oldest?parse(oldest).getTime():null});
+ $('#backupNote').hidden=!due;
+ if(due)$('#backupText').textContent=due.never?'Вы ещё не сохраняли резервную копию своих данных.':`Последняя резервная копия: ${due.days} ${plural(due.days,'день','дня','дней')} назад.`;
+}
 const JOKES_KEY='daymark-jokes-v1';
 let jokesOn=readJSON(JOKES_KEY,true)!==false;
 function renderDaySummary(){
@@ -440,7 +454,7 @@ function renderSummary(){
 function storeGoals(){localStorage.setItem(GOAL_KEY,JSON.stringify(goals));localStorage.setItem(DELETED_GOALS_KEY,JSON.stringify([...deletedGoals]));localStorage.setItem(GOAL_CHANGES_KEY,JSON.stringify(goalChanges))}function persistGoals(){storeGoals();scheduleSync()}
 
 function renderExtras(){
- renderDaySummary();
+ renderDaySummary();renderBackupNote();
  const monthStart=new Date(calDate.getFullYear(),calDate.getMonth(),1), offset=(monthStart.getDay()+6)%7, daysIn=new Date(calDate.getFullYear(),calDate.getMonth()+1,0).getDate(), prevCount=new Date(calDate.getFullYear(),calDate.getMonth(),0).getDate();
  $('#calMonth').textContent=fmtDate(calDate,{month:'long',year:'numeric'});
  const sums={};data.forEach(x=>sums[x.date]=(sums[x.date]||0)+x.minutes);const max=Math.max(...Object.values(sums),1);let cells=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(x=>`<div class="calweekday">${x}</div>`).join('');
@@ -467,9 +481,10 @@ function renderTimer(){
   bar.innerHTML='';
  }else{
   const running=TimerLogic.isRunning(t),time=fmtClock(TimerLogic.totals(t,Date.now()).activeMs);
-  box.className='live-timer '+(running?'active':'paused');
-  box.innerHTML=`<div class="timer-info"><div class="timer-name"><i class="dot" style="background:${color(t.type)}"></i>${esc(t.type)}</div><div class="timer-clock">${time}</div><div class="timer-state">${running?'Идёт':'На паузе'} · начато ${fmtStarted(t)}</div></div><div class="timer-buttons">${timerButtons(running,false)}</div>`;
-  bar.innerHTML=`<div class="timer-info"><div class="timer-name"><i class="dot" style="background:${color(t.type)}"></i>${esc(t.type)}${running?'':' · пауза'}</div><div class="timer-clock">${time}</div></div><div class="timer-buttons">${timerButtons(running,true)}</div>`;
+  const check=TimerLogic.needsCheck(t,Date.now());
+  box.className='live-timer '+(running?'active':'paused')+(check?' needs-check':'');
+  box.innerHTML=`<div class="timer-info"><div class="timer-name"><i class="dot" style="background:${color(t.type)}"></i>${esc(t.type)}</div><div class="timer-clock">${time}</div><div class="timer-state">${check?'Идёт уже долго. Всё ещё занимаетесь?':`${running?'Идёт':'На паузе'} · начато ${fmtStarted(t)}`}</div></div><div class="timer-buttons">${check?'<button class="btn" data-timer="keep">Да, продолжаю</button>':''}${timerButtons(running,false)}</div>`;
+  bar.innerHTML=`<div class="timer-info"><div class="timer-name"><i class="dot" style="background:${color(t.type)}"></i>${esc(t.type)}${running?check?' · ещё занимаетесь?':'':' · пауза'}</div><div class="timer-clock">${time}</div></div><div class="timer-buttons">${timerButtons(running,true)}</div>`;
   bar.classList.toggle('paused',!running);
  }
  updateTimerBar();
@@ -478,15 +493,28 @@ function renderTimer(){
 let timerBoxOnScreen=true;
 function updateTimerBar(){const show=Boolean(activeTimer())&&!timerBoxOnScreen;$('#timerBar').classList.toggle('show',show);document.body.classList.toggle('timer-bar-on',show)}
 if('IntersectionObserver' in window)new IntersectionObserver(([entry])=>{timerBoxOnScreen=entry.isIntersecting;updateTimerBar()}).observe($('#liveTimer'));
+let stopTimeEdited=false;
+// The chosen end moment, or null if the typed time isn't valid.
+function chosenStop(t,now){return stopTimeEdited?TimerLogic.resolveStopTime(t,now,$('#stopTime').value):TimerLogic.lastActivity(t,now)}
+function updateStopSummary(){
+ const t=activeTimer();if(!t)return;
+ const now=Date.now(),stop=chosenStop(t,now);
+ $('#stopError').hidden=stop!==null;$('#stopConfirm').disabled=stop===null;
+ if(stop===null)return;
+ const {activeMs,pausedMs}=TimerLogic.totals(TimerLogic.stoppedAt(t,stop),stop),tooShort=activeMs<TimerLogic.MIN_ACTIVE_MS;
+ $('#stopSummary').innerHTML=`<div>${esc(t.type)}</div><strong>${fmtClock(activeMs)}</strong><div>Начато ${fmtStarted(t)}${pausedMs>=60000?` · на паузе ${hm(pausedMs/60000)}`:''}</div>${tooShort?'<div>Меньше 30 секунд: запись не сохранится.</div>':''}`;
+}
 function openStopDialog(){
  const t=activeTimer();if(!t)return;
- const now=Date.now(),{activeMs,pausedMs}=TimerLogic.totals(t,now),tooShort=activeMs<TimerLogic.MIN_ACTIVE_MS;
- $('#stopSummary').innerHTML=`<div>${esc(t.type)}</div><strong>${fmtClock(activeMs)}</strong><div>Начато ${fmtStarted(t)}${pausedMs>=60000?` · на паузе ${hm(pausedMs/60000)}`:''}</div>${tooShort?'<div>Меньше 30 секунд: запись не сохранится.</div>':''}`;
- $('#stopNote').value='';$('#stopDialog').showModal();
+ const last=new Date(TimerLogic.lastActivity(t,Date.now()));
+ stopTimeEdited=false;
+ $('#stopTime').value=`${String(last.getHours()).padStart(2,'0')}:${String(last.getMinutes()).padStart(2,'0')}`;
+ $('#stopNote').value='';updateStopSummary();$('#stopDialog').showModal();
 }
 function finishTimer(){
  const t=activeTimer();if(!t)return;
- const entries=TimerLogic.toEntries(t,Date.now()),note=$('#stopNote').value.trim();
+ const stop=chosenStop(t,Date.now());if(stop===null)return;
+ const entries=TimerLogic.toEntries(TimerLogic.stoppedAt(t,stop),stop),note=$('#stopNote').value.trim();
  for(const entry of entries){
   const existing=data.find(x=>x.id===entry.id);
   // A stop made on another device may have saved this already: update it, not add a copy.
@@ -494,19 +522,27 @@ function finishTimer(){
   else data.push({...entry,note,updatedAt:Date.now()});
  }
  timer={updatedAt:nextStamp(t.updatedAt),stopped:true};storeTimer();
- date=new Date();date.setHours(0,0,0,0);
+ date=entries.length?parse(entries.at(-1).date):new Date();date.setHours(0,0,0,0);
  save();render();renderTimer();
  toast(entries.length?'Занятие сохранено':'Меньше 30 секунд: запись не сохранена');
 }
+function discardTimer(){
+ const t=activeTimer();if(!t)return;
+ changeTimer({stopped:true});
+ toastWithAction('Таймер удалён','Отменить',()=>{changeTimer(t);toast('Таймер восстановлен')});
+}
+$('#stopTime').addEventListener('input',()=>{stopTimeEdited=true;updateStopSummary()});
+$('#stopDiscard').onclick=()=>{$('#stopDialog').close();discardTimer()};
 $('#liveTimer').onclick=$('#timerBar').onclick=e=>{
  const action=e.target.closest('[data-timer]')?.dataset.timer,t=activeTimer(),now=Date.now();
  if(action==='start'&&selected&&!t)changeTimer({id:crypto.randomUUID(),type:selected,segments:[{start:now,end:null}]});
  else if(action==='pause'&&t&&TimerLogic.isRunning(t))changeTimer({...t,segments:t.segments.map((s,i)=>i===t.segments.length-1?{...s,end:now}:s)});
  else if(action==='resume'&&t&&!TimerLogic.isRunning(t))changeTimer({...t,segments:[...t.segments,{start:now,end:null}]});
+ else if(action==='keep'&&t)changeTimer({...t,checkedMs:TimerLogic.totals(t,now).activeMs});
  else if(action==='stop')openStopDialog();
 };
 $('#stopConfirm').onclick=()=>{$('#stopDialog').close();finishTimer()};$('#stopCancel').onclick=()=>$('#stopDialog').close();
-setInterval(()=>{const t=activeTimer();if(t&&TimerLogic.isRunning(t)){const time=fmtClock(TimerLogic.totals(t,Date.now()).activeMs);document.querySelectorAll('.timer-clock').forEach(el=>el.textContent=time)}},1000);
+setInterval(()=>{const t=activeTimer();if(t&&TimerLogic.isRunning(t)){if(TimerLogic.needsCheck(t,Date.now())!==$('#liveTimer').classList.contains('needs-check'))renderTimer();const time=fmtClock(TimerLogic.totals(t,Date.now()).activeMs);document.querySelectorAll('.timer-clock').forEach(el=>el.textContent=time)}},1000);
 function beginEdit(id){let item=data.find(x=>x.id===id);if(!item)return;editingId=id;date=parse(item.date);selected=item.type;$('#start').value=item.start;$('#end').value=item.end;$('#note').value=item.note||'';$('#entryTitle').textContent='Изменить занятие';$('#addBtn').textContent='Сохранить изменения';$('#editBanner').classList.add('show');$('#manualEntry').open=true;renderTypes();updateDuration();render();document.querySelector('.entry').scrollIntoView({behavior:'smooth',block:'center'})}
 function cancelEdit(){editingId=null;timesTouched=false;refreshDefaultTimes();$('#entryTitle').textContent='Добавить занятие';$('#addBtn').textContent='Добавить';$('#editBanner').classList.remove('show');$('#note').value='';renderTypes();updateDuration()}
 $('#cancelEdit').onclick=cancelEdit;
@@ -537,7 +573,8 @@ $('#addBtn').onclick=()=>{
   timesTouched=true;setTimes(TimerLogic.followingTimes(end,new Date()));
   render();toast('Занятие сохранено');
  }
-};$('#prevDay').onclick=()=>{date.setDate(date.getDate()-1);render()};$('#nextDay').onclick=()=>{date.setDate(date.getDate()+1);render()};$('#todayBtn').onclick=()=>{date=new Date();date.setHours(0,0,0,0);render()};$('#period').onclick=e=>{let b=e.target.closest('button[data-period]');if(!b)return;period=b.dataset.period;document.querySelectorAll('#period button').forEach(x=>x.classList.toggle('active',x===b));renderSummary()};$('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{let parsed=JSON.parse(await file.text());let added=importBackup(parsed);render();toast(added?`Импортировано записей: ${added}`:'Новых записей не найдено')}catch(_){toast('Не удалось прочитать файл резервной копии')}e.target.value=''};$('#exportBtn').onclick=()=>{let blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),...cloudPayload()},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`aktivnosti-${iso(new Date())}.json`;a.click();URL.revokeObjectURL(a.href);toast('Данные экспортированы')};
+};$('#prevDay').onclick=()=>{date.setDate(date.getDate()-1);render()};$('#nextDay').onclick=()=>{date.setDate(date.getDate()+1);render()};$('#todayBtn').onclick=()=>{date=new Date();date.setHours(0,0,0,0);render()};$('#period').onclick=e=>{let b=e.target.closest('button[data-period]');if(!b)return;period=b.dataset.period;document.querySelectorAll('#period button').forEach(x=>x.classList.toggle('active',x===b));renderSummary()};$('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{let parsed=JSON.parse(await file.text());let added=importBackup(parsed);render();toast(added?`Импортировано записей: ${added}`:'Новых записей не найдено')}catch(_){toast('Не удалось прочитать файл резервной копии')}e.target.value=''};function exportBackup(){let blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),...cloudPayload()},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`aktivnosti-${iso(new Date())}.json`;a.click();URL.revokeObjectURL(a.href);localStorage.setItem(LAST_BACKUP_KEY,JSON.stringify(Date.now()));renderBackupNote();toast('Резервная копия сохранена')}
+$('#exportBtn').onclick=exportBackup;$('#backupNow').onclick=exportBackup;$('#backupLater').onclick=()=>{localStorage.setItem(BACKUP_SNOOZE_KEY,JSON.stringify(BackupReminder.snoozeUntil(Date.now())));renderBackupNote()};
 // Restores entries, activities and goals from a backup. Older backups hold entries only:
 // activities they mention that are missing here get created rather than the entries skipped.
 function importBackup(parsed){
