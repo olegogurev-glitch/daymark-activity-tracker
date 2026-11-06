@@ -1,6 +1,7 @@
 # Browsers must check for a new version of the app's code every time. Otherwise they can keep
 # an old script for hours and combine it with a newer page, which stops the app from starting.
-# It says no-cache because the summershots.org zone raises a lower max-age to 4 hours.
+# On day.summershots.org the zone's Browser Cache TTL still sets scripts to 4 hours, so there the
+# service worker's no-cache fetches and the recovery script in index.html provide the protection.
 /*
   Cache-Control: no-cache
 
