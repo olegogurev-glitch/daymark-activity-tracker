@@ -1,0 +1,7 @@
+# Browsers must check for a new version of the app's code every time. Otherwise they can keep
+# an old script for hours and combine it with a newer page, which stops the app from starting.
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/icons/*
+  Cache-Control: public, max-age=86400

@@ -335,6 +335,9 @@ body.timer-bar-on .toast{bottom:92px}
 .sync-status:empty{display:none}
 #syncBtn{display:inline-block;max-width:150px;overflow:hidden;text-overflow:ellipsis}
 
+#startProblem{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:12px 16px;background:var(--night);color:#fff;font-size:14px;text-align:center}
+#startProblem button{min-height:38px;padding:7px 13px;border:0;border-radius:10px;background:#fff;color:var(--night);font-weight:600}
+
 /* Medium screens: one column for the day's work, two for the overview. */
 @media(max-width:980px){
  .savehint{display:none}
@@ -425,6 +428,32 @@ body.timer-bar-on .toast{bottom:92px}
 <section class="card calendar-card"><div class="card-head"><div><h2 class="cardtitle">Календарь</h2><div class="sub">Ваши активные дни</div></div><div class="mini-nav"><button class="iconbtn" id="calPrev" aria-label="Предыдущий месяц"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button><button class="iconbtn" id="calNext" aria-label="Следующий месяц"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button></div></div><div class="calendar-title" id="calMonth"></div><div class="calgrid" id="calendar"></div><div class="cal-legend"><span>Меньше</span><i class="cal-swatch"></i><i class="cal-swatch l2"></i><i class="cal-swatch l3"></i><span>Больше</span><span class="cal-selected-key"><i></i> Выбранный день</span></div></section>
 <section class="card types-card"><details class="types-panel"><summary><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg><h2 class="cardtitle">Мои занятия</h2><div class="sub">Добавляйте и настраивайте список</div></summary><div class="type-add"><input class="input" id="newType" placeholder="Например, прогулка" aria-label="Новое занятие"><button class="btn primary" id="addType">Добавить</button></div><p class="manage-hint">Можно переименовывать, менять порядок и скрывать ненужные занятия.</p><label class="chip-order"><input type="checkbox" id="chipsByUse"> Сначала показывать частые занятия</label><div class="type-list" id="typeList"></div></details></section>
 </aside></div></div><div class="timer-bar" id="timerBar"></div><div class="toast" id="toast"></div>
+<script>
+// If the app doesn't finish starting, an old copy of a script is the likely cause: fetch fresh
+// copies and reload once. Nothing here touches the person's data.
+(function(){
+ const FLAG='daymark-recovering',FILES=['./','sync-merge.js','timer-logic.js','day-summary.js','backup-reminder.js','stats.js'];
+ function showProblem(){
+  if(document.getElementById('startProblem'))return;
+  const box=document.createElement('div');box.id='startProblem';box.setAttribute('role','alert');
+  box.innerHTML='<strong>Приложение не запустилось.</strong> Ваши данные в сохранности. <button type="button">Обновить страницу</button>';
+  box.querySelector('button').onclick=()=>{try{sessionStorage.removeItem(FLAG)}catch(_){}location.reload()};
+  document.body.prepend(box);
+ }
+ async function recover(){
+  let tried=false;try{tried=sessionStorage.getItem(FLAG)==='1'}catch(_){}
+  if(tried||navigator.onLine===false){showProblem();return}
+  try{
+   sessionStorage.setItem(FLAG,'1');
+   const replies=await Promise.all(FILES.map(file=>fetch(file,{cache:'reload'})));
+   if(!replies.every(r=>r.ok)){showProblem();return}
+   if(window.caches)await Promise.all((await caches.keys()).map(name=>caches.delete(name)));
+   location.reload();
+  }catch(_){showProblem()}
+ }
+ window.addEventListener('load',()=>{if(window.__appStarted){try{sessionStorage.removeItem(FLAG)}catch(_){}}else recover()});
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script><script src="sync-merge.js"></script><script src="timer-logic.js"></script><script src="day-summary.js"></script><script src="backup-reminder.js"></script><script src="stats.js"></script><script>
 function readJSON(key,fallback){try{let value=JSON.parse(localStorage.getItem(key));return value===null||value===undefined?fallback:value}catch(_){return fallback}}
 const TYPES=readJSON('daymark-types-v1',null)||[['работа','#ed7771'],['психология','#95c99a'],['медитация','#efc75e'],['ходьба','#bc8ad5'],['аудиокнига','#95c99a'],['упражнения','#bc8ad5'],['рисование','#74b9d8'],['изучение языка','#efc75e'],['чтение','#95c99a'],['скакалка','#bc8ad5'],['вязание','#95c99a'],['танцы','#bc8ad5']];const HIDDEN=new Set(readJSON('daymark-hidden-types-v1',[]));
@@ -904,4 +933,5 @@ $('#manualEntry').open=matchMedia('(min-width:641px)').matches;
 $('#moreMenu').addEventListener('click',e=>{if(e.target.closest('.more-list button'))$('#moreMenu').open=false});
 document.addEventListener('click',e=>{if(!e.target.closest('#moreMenu'))$('#moreMenu').open=false});
 refreshChipOrder();preselectLastUsed();renderTypes();refreshDefaultTimes();updateDuration();render();
+window.__appStarted=true;
 </script></body></html>

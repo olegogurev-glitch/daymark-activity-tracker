@@ -3,7 +3,7 @@
 // The app's own files use the network first, so people get the newest version whenever they
 // are online, and the saved copy only when they aren't. Data requests to Supabase are never
 // touched: they always go straight to the network.
-const CACHE = 'moy-den-v2';
+const CACHE = 'moy-den-v3';
 const NETWORK_TIMEOUT_MS = 4000;
 
 const APP_FILES = [
@@ -30,7 +30,7 @@ const LIBRARY_HOSTS = new Set(['cdn.jsdelivr.net', 'fonts.googleapis.com', 'font
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
-    await cache.addAll(APP_FILES);
+    await cache.addAll(APP_FILES.map((file) => new Request(file, { cache: 'no-cache' })));
     // Fonts and the library are nice to have: failing to save one mustn't stop the install.
     await Promise.allSettled(LIBRARY_FILES.map(async (url) => {
       // These come from other sites, so they can't go through cache.add.
@@ -53,7 +53,8 @@ async function networkFirst(request) {
   // Every page address of the app is the same page.
   const key = request.mode === 'navigate' ? new URL('./', self.registration.scope).href : request;
   const saved = await cache.match(key, { ignoreSearch: true });
-  const fromNetwork = fetch(request).then((response) => {
+  // Always check with the server, so the page and its scripts can't come from different versions.
+  const fromNetwork = fetch(request.mode === 'navigate' ? request : new Request(request, { cache: 'no-cache' })).then((response) => {
     if (response.ok && response.type === 'basic') cache.put(key, response.clone());
     return response;
   });
