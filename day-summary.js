@@ -227,7 +227,7 @@
     const goal = reachedGoal(entries, goals, date);
     if (goal) {
       const ending = goal.isSunday ? 'как раз к концу недели' : 'а неделя ещё не закончилась';
-      return { kind: 'goal', text: `Цель выполнена: ${goal.hours} ч на занятие «${goal.type}», ${ending}.` };
+      return { kind: 'goal', text: `Цель выполнена: ${String(goal.hours).replace('.', ',')} ч на занятие «${goal.type}», ${ending}.` };
     }
 
     const dateNumber = dayNumber(date);

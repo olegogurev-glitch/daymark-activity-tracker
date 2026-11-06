@@ -82,6 +82,11 @@ test('reaching a weekly goal on this day is recognised once', () => {
   assert.notEqual(run({ entries: [...entries, entry('2026-11-06', 30, 'чтение')], date: '2026-11-06', today: '2026-11-06', goals: { 'чтение': 3 } }).kind, 'goal');
 });
 
+test('a goal with half hours uses a Russian decimal comma', () => {
+  const entries = [entry('2026-11-05', 150, 'чтение')];
+  assert.match(run({ entries, goals: { 'чтение': 2.5 } }).text, /2,5 ч/);
+});
+
 test('a goal reached on Sunday says so, and last week does not count', () => {
   const entries = [entry('2026-11-07', 120, 'чтение'), entry('2026-11-08', 60, 'чтение')];
   assert.match(run({ entries, date: '2026-11-08', today: '2026-11-08', goals: { 'чтение': 3 } }).text, /к концу недели/);
