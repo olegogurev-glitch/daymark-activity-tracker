@@ -3,7 +3,7 @@
 // The app's own files use the network first, so people get the newest version whenever they
 // are online, and the saved copy only when they aren't. Data requests to Supabase are never
 // touched: they always go straight to the network.
-const CACHE = 'moy-den-v1';
+const CACHE = 'moy-den-v2';
 const NETWORK_TIMEOUT_MS = 4000;
 
 const APP_FILES = [
@@ -12,6 +12,7 @@ const APP_FILES = [
   'timer-logic.js',
   'day-summary.js',
   'backup-reminder.js',
+  'stats.js',
   'manifest.webmanifest',
   'icons/logo-96.png',
   'icons/favicon-32.png',

@@ -145,13 +145,6 @@ body.timer-bar-on .toast{bottom:92px}
 .stat span{font-size:13px;color:var(--ink-3)}
 .stat+.stat{border-left:1px solid var(--line);padding-left:16px}
 .charttitle{font-size:13px;font-weight:500;color:var(--ink-2);margin:0 0 10px}
-.bars{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;height:152px}
-.barcol{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;min-width:0}
-.barval{font-size:11px;color:var(--ink-3);white-space:nowrap}
-.bar{width:100%;max-width:26px;min-height:3px;border-radius:7px 7px 3px 3px;background:#c9c0e2}
-.barcol.today .bar{background:var(--accent)}
-.barcol.today .barlabel{color:var(--ink);font-weight:600}
-.barlabel{font-size:12px;color:var(--ink-3)}
 .insight{margin-top:18px;padding-top:15px;border-top:1px solid var(--line);font-size:14px;color:var(--ink-2)}
 .insight strong{font-weight:600;color:var(--ink)}
 
@@ -255,10 +248,11 @@ body.timer-bar-on .toast{bottom:92px}
 
 /* Rhythm: the overview, in lavender */
 .summary{background:linear-gradient(165deg,#f1edf9,#e5dff4);border-color:#dbd3ec}
-.summary .sub,.summary .stat span,.summary .barlabel,.summary .barval{color:var(--ink-2)}
+.summary .sub,.summary .stat span,.summary .bar-axis,.summary .barval{color:var(--ink-2)}
 .summary .period{background:#ffffff80}
 .summary .stat+.stat,.summary .insight{border-color:#cfc6e4}
-.summary .bar{background:#b3a6d8}.summary .barcol.today .bar{background:var(--accent)}
+.summary .barcol.active{background:#ffffff66}
+.summary .bars{border-color:#b9aed6}
 
 /* Time by activity: lies open on the page, no card */
 .breakdown{background:transparent;border-color:transparent;box-shadow:none;padding:10px 8px}
@@ -311,6 +305,23 @@ body.timer-bar-on .toast{bottom:92px}
 .btn.danger:hover{background:#8f3f60;border-color:#8f3f60}
 .ask-dialog .sync-head p{margin-bottom:6px}
 .ask-dialog .sync-field{margin-top:12px}
+
+/* Chart: bars grow from a shared baseline, one column per day or month. */
+.comparison{display:flex;align-items:center;gap:6px;margin:-8px 0 18px;font-size:14px;font-weight:500}
+.comparison .ic{width:15px;height:15px}
+.bars{display:grid;grid-template-columns:repeat(var(--bar-count,7),minmax(0,1fr));height:132px;border-bottom:1px solid var(--line-strong)}
+.barcol{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-width:0;height:100%;padding:0 1px;border:0;border-radius:6px 6px 0 0;background:transparent;cursor:default}
+.barcol:focus-visible{outline-offset:-2px}
+.bar{display:block;width:100%;max-width:26px;border-radius:4px 4px 0 0;background:#8273bd}
+.barcol.today .bar{background:#3a2f5f}
+.barval{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--bar-h,0px) + 4px);font-size:11px;white-space:nowrap;pointer-events:none}
+.bars:empty{display:none}
+.bar-axis:empty{display:none}
+.bar-axis{display:grid;grid-template-columns:repeat(var(--bar-count,7),minmax(0,1fr));margin-top:5px;font-size:12px;color:var(--ink-3)}
+.bar-axis span{text-align:center;white-space:nowrap;min-width:0}
+.bar-axis .today{color:var(--ink);font-weight:600}
+.bar-readout{min-height:20px;margin-top:6px;font-size:13px;font-weight:500}
+.bar-readout::first-letter{text-transform:uppercase}
 
 /* Medium screens: one column for the day's work, two for the overview. */
 @media(max-width:980px){
@@ -396,12 +407,12 @@ body.timer-bar-on .toast{bottom:92px}
 <section class="card habits-card"><div class="pattern-head"><div><h2 class="cardtitle">Ваши привычки</h2><div class="sub">В какие дни что нравится делать</div></div><select id="patternType" aria-label="Занятие для анализа"></select></div><div class="pattern-days" id="patternDays"></div><p class="pattern-copy" id="patternCopy"></p></section>
 </div>
 </main><aside class="side">
-<section class="card summary"><h2 class="cardtitle">Мой ритм</h2><div class="sub">Смотрите, что радует чаще</div><div class="period" id="period"><button data-period="week" class="active">Неделя</button><button data-period="month">Месяц</button><button data-period="all">Всё время</button></div><div class="stats"><div class="stat" title="Одновременные занятия учитываются отдельно"><b id="totalHours">0 мин</b><span>всего времени</span></div><div class="stat"><b id="activeDays">0</b><span id="activeDaysLabel">активных дней</span></div></div><h3 class="charttitle" id="chartTitle">Часы по дням недели</h3><div class="bars" id="bars"></div><div class="insight" id="insight">Пока тут тихо. Добавьте пару занятий — и увидите свой ритм!</div></section>
+<section class="card summary"><h2 class="cardtitle">Мой ритм</h2><div class="sub">Смотрите, что радует чаще</div><div class="period" id="period"><button data-period="week" class="active">Неделя</button><button data-period="month">Месяц</button><button data-period="all">Всё время</button></div><div class="stats"><div class="stat" title="Одновременные занятия учитываются отдельно"><b id="totalHours">0 мин</b><span>всего времени</span></div><div class="stat"><b id="activeDays">0</b><span id="activeDaysLabel">активных дней</span></div></div><p class="comparison" id="comparison" hidden></p><h3 class="charttitle" id="chartTitle">Часы по дням</h3><div class="bars" id="bars" role="group" aria-labelledby="chartTitle"></div><div class="bar-axis" id="barAxis" aria-hidden="true"></div><div class="bar-readout" id="barReadout" aria-live="polite"></div><div class="insight" id="insight">Пока тут тихо. Добавьте пару занятий — и увидите свой ритм!</div></section>
 <section class="card goals-card"><h2 class="cardtitle">Недельные цели</h2><div class="sub">Поставьте себе цель — в своём темпе</div><div class="goal-form"><select id="goalType" aria-label="Занятие для цели"></select><input id="goalHours" type="number" min="0.5" step="0.5" value="3" aria-label="Часов в неделю"><button class="btn primary" id="saveGoal">Добавить</button></div><div id="goals"></div></section>
 <section class="card calendar-card"><div class="card-head"><div><h2 class="cardtitle">Календарь</h2><div class="sub">Ваши активные дни</div></div><div class="mini-nav"><button class="iconbtn" id="calPrev" aria-label="Предыдущий месяц"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button><button class="iconbtn" id="calNext" aria-label="Следующий месяц"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button></div></div><div class="calendar-title" id="calMonth"></div><div class="calgrid" id="calendar"></div><div class="cal-legend"><span>Меньше</span><i class="cal-swatch"></i><i class="cal-swatch l2"></i><i class="cal-swatch l3"></i><span>Больше</span><span class="cal-selected-key"><i></i> Выбранный день</span></div></section>
 <section class="card types-card"><details class="types-panel"><summary><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg><h2 class="cardtitle">Мои занятия</h2><div class="sub">Добавляйте и настраивайте список</div></summary><div class="type-add"><input class="input" id="newType" placeholder="Например, прогулка" aria-label="Новое занятие"><button class="btn primary" id="addType">Добавить</button></div><p class="manage-hint">Можно переименовывать, менять порядок и скрывать ненужные занятия.</p><div class="type-list" id="typeList"></div></details></section>
 </aside></div></div><div class="timer-bar" id="timerBar"></div><div class="toast" id="toast"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script><script src="sync-merge.js"></script><script src="timer-logic.js"></script><script src="day-summary.js"></script><script src="backup-reminder.js"></script><script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script><script src="sync-merge.js"></script><script src="timer-logic.js"></script><script src="day-summary.js"></script><script src="backup-reminder.js"></script><script src="stats.js"></script><script>
 function readJSON(key,fallback){try{let value=JSON.parse(localStorage.getItem(key));return value===null||value===undefined?fallback:value}catch(_){return fallback}}
 const TYPES=readJSON('daymark-types-v1',null)||[['работа','#ed7771'],['психология','#95c99a'],['медитация','#efc75e'],['ходьба','#bc8ad5'],['аудиокнига','#95c99a'],['упражнения','#bc8ad5'],['рисование','#74b9d8'],['изучение языка','#efc75e'],['чтение','#95c99a'],['скакалка','#bc8ad5'],['вязание','#95c99a'],['танцы','#bc8ad5']];const HIDDEN=new Set(readJSON('daymark-hidden-types-v1',[]));
 const KEY='daymark-activities-v1', GOAL_KEY='daymark-weekly-goals-v1', DELETED_KEY='daymark-deleted-activities-v1', DELETED_TYPES_KEY='daymark-deleted-types-v1', DELETED_GOALS_KEY='daymark-deleted-goals-v1', GOAL_CHANGES_KEY='daymark-goal-changes-v1', TYPE_CHANGES_KEY='daymark-type-changes-v1', TYPE_ORDER_KEY='daymark-type-order-v1', TIMER_KEY='daymark-timer-v1', HIGHLIGHTS_KEY='daymark-highlights-v1', TYPE_COLORS=['#ed9b75','#86b9dc','#b890d2','#91bf86','#e8bf60','#e27d84'];let data=readJSON(KEY,[]),deletedIds=new Set(readJSON(DELETED_KEY,[])),deletedTypes=new Set(readJSON(DELETED_TYPES_KEY,[])),deletedGoals=new Set(readJSON(DELETED_GOALS_KEY,[])),goalChanges=readJSON(GOAL_CHANGES_KEY,{}),goals=readJSON(GOAL_KEY,{}),typeChanges=readJSON(TYPE_CHANGES_KEY,{}),typeOrder=readJSON(TYPE_ORDER_KEY,null),timer=readJSON(TIMER_KEY,null),highlights=readJSON(HIGHLIGHTS_KEY,{}),selected=TYPES[0]?.[0]||'',date=new Date(),calDate=new Date(),period='week',summaryActivity=null;date.setHours(0,0,0,0);calDate.setDate(1);
@@ -477,17 +488,54 @@ function renderDaySummary(){
 $('#jokesBtn').onclick=()=>{jokesOn=!jokesOn;localStorage.setItem(JOKES_KEY,JSON.stringify(jokesOn));renderDaySummary();toast(jokesOn?'Шутки включены':'Шутки выключены')};
 // Keeps the line right when the page stays open past the evening or past midnight.
 setInterval(renderDaySummary,60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')renderDaySummary()});
+function bucketTitle(b){return b.kind==='month'?fmtDate(parse(`${b.key}-01`),{month:'long',year:'numeric'}):fmtDate(parse(b.key),{weekday:'short',day:'numeric',month:'short'})}
+function axisLabel(b,i,n){
+ if(b.kind==='month')return n>8&&i%2?'':fmtDate(parse(`${b.key}-01`),{month:'short'}).replace('.','');
+ const d=parse(b.key);
+ if(n<=7)return fmtDate(d,{weekday:'short'}).replace(/^./,c=>c.toUpperCase());
+ return (i%7===0)?String(d.getDate()):'';
+}
+function comparisonText(c){
+ if(!c||(!c.current&&!c.previous))return null;
+ const place=c.unit==='week'?(c.isPartial?'за те же дни прошлой недели':'на прошлой неделе'):(c.isPartial?'за те же дни прошлого месяца':'в прошлом месяце');
+ if(!c.previous)return {text:`${place[0].toUpperCase()}${place.slice(1)} записей не было`,icon:null};
+ const diff=c.current-c.previous;
+ if(!diff)return {text:`Столько же, сколько ${place}`,icon:null};
+ return {text:`На ${hm(Math.abs(diff))} ${diff>0?'больше':'меньше'}, чем ${place}`,icon:diff>0?'up':'down'};
+}
+function showBarReadout(i){
+ const column=$('#bars').querySelector(`[data-bar="${i}"]`);if(!column)return;
+ document.querySelectorAll('#bars .active').forEach(x=>x.classList.remove('active'));
+ column.classList.add('active');$('#barReadout').textContent=column.getAttribute('aria-label');
+}
+$('#bars').addEventListener('pointerover',e=>{const c=e.target.closest('[data-bar]');if(c)showBarReadout(c.dataset.bar)});
+$('#bars').addEventListener('focusin',e=>{const c=e.target.closest('[data-bar]');if(c)showBarReadout(c.dataset.bar)});
+$('#bars').addEventListener('click',e=>{const c=e.target.closest('[data-bar]');if(c)showBarReadout(c.dataset.bar)});
+$('#bars').addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){document.querySelectorAll('#bars .active').forEach(x=>x.classList.remove('active'));$('#barReadout').textContent=''}});
 function renderSummary(){
- let ref=new Date(date),start,end;
- if(period==='week'){let wd=(ref.getDay()+6)%7;start=new Date(ref);start.setDate(ref.getDate()-wd);end=new Date(start);end.setDate(start.getDate()+6)}
- else if(period==='month'){start=new Date(ref.getFullYear(),ref.getMonth(),1);end=new Date(ref.getFullYear(),ref.getMonth()+1,0)}
- else {start=new Date(0);end=new Date(8640000000000000)}
- let periodEntries=data.filter(x=>{let d=parse(x.date);return d>=start&&d<=end});let arr=summaryActivity?periodEntries.filter(x=>x.type===summaryActivity):periodEntries;
- let total=arr.reduce((s,x)=>s+x.minutes,0),days=new Set(arr.map(x=>x.date)).size;$('#totalHours').textContent=hm(total);$('#activeDays').textContent=days;$('#activeDaysLabel').textContent=plural(days,'активный день','активных дня','активных дней');
- let labels=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],vals=Array(7).fill(0);arr.forEach(x=>vals[(parse(x.date).getDay()+6)%7]+=x.minutes);let max=Math.max(...vals,1);$('#chartTitle').textContent=summaryActivity?`${summaryActivity}: часы по дням недели`:period==='month'?`Активность по дням недели · ${fmtDate(ref,{month:'long',year:'numeric'})}`:period==='all'?'Активность по дням недели · всё время':'Часы по дням недели';const todayKey=iso(new Date()),todayCol=period==='week'&&parse(todayKey)>=start&&parse(todayKey)<=end?(parse(todayKey).getDay()+6)%7:-1;$('#bars').innerHTML=vals.map((v,i)=>`<div class="barcol ${i===todayCol?'today':''}"><span class="barval">${v?fmtHours(v/60)+' ч':''}</span><div class="bar" style="height:${Math.max(v?5:3,v/max*104)}px;${summaryActivity?'background:'+color(summaryActivity):''}"></div><span class="barlabel">${labels[i]}</span></div>`).join('');
- let sums={};periodEntries.forEach(x=>sums[x.type]=(sums[x.type]||0)+x.minutes);let ranking=Object.entries(sums).sort((a,b)=>b[1]-a[1]);let top=ranking[0],dow=vals.indexOf(Math.max(...vals)),count=vals.filter(v=>v===Math.max(...vals)&&v>0).length;
- $('#insight').innerHTML=summaryActivity?(total?`Больше всего времени на <strong>${esc(summaryActivity)}</strong> вы потратили по <strong>${labels[dow]}</strong>${count>1?' (несколько дней одинаково)':''}. Всего за период — <strong>${arr.length} ${plural(arr.length,'занятие','занятия','занятий')}</strong> за ${days} ${plural(days,'день','дня','дней')}.`:'В этот период записей по этому занятию нет.'):(top?`Больше всего времени вы уделили занятию <strong>${esc(top[0])}</strong>. Самый активный день недели — <strong>${labels[dow]}</strong>.`:'Пока тут тихо. Добавьте пару занятий — и увидите свой ритм!');
- $('#breakdown').innerHTML=`<button class="filter-all ${summaryActivity?'':'active'}" id="allActivities">Все занятия</button>`+(ranking.length?ranking.map(([t,v])=>`<button class="breakrow ${summaryActivity===t?'chosen':''}" data-filter-activity="${esc(t)}"><span class="breakname"><i class="dot" style="background:${color(t)}"></i>${esc(t)}</span><span class="breakhrs">${hm(v)}</span><span class="track"><span class="fill" style="display:block;width:${v/Math.max(...ranking.map(x=>x[1]),1)*100}%;background:${color(t)}"></span></span></button>`).join(''):'<div class="empty" style="padding:22px 0 4px">Пока пусто — скоро здесь появится ваша статистика!</div>');$('#allActivities').onclick=()=>{summaryActivity=null;renderSummary()};document.querySelectorAll('[data-filter-activity]').forEach(b=>b.onclick=()=>{summaryActivity=b.dataset.filterActivity;renderSummary()});
+ const stats=StatsLogic.periodStats({period,ref:iso(date),today:iso(new Date()),entries:data,type:summaryActivity});
+ const inView=x=>x.date>=stats.from&&x.date<=stats.to;
+ const periodEntries=data.filter(inView),arr=summaryActivity?periodEntries.filter(x=>x.type===summaryActivity):periodEntries;
+ const total=stats.total,days=stats.activeDays;
+ $('#totalHours').textContent=hm(total);$('#activeDays').textContent=days;$('#activeDaysLabel').textContent=plural(days,'активный день','активных дня','активных дней');
+ const compared=comparisonText(stats.comparison),line=$('#comparison');
+ line.hidden=!compared;
+ if(compared)line.innerHTML=`${compared.icon?ic(compared.icon):''}<span>${esc(compared.text)}</span>`;
+ const buckets=stats.buckets,n=buckets.length,max=Math.max(...buckets.map(b=>b.minutes),1),peak=buckets.findIndex(b=>b.minutes===max);
+ const sameMonth=stats.from.slice(0,7)===stats.to.slice(0,7);
+ const scope=period==='week'?(sameMonth?`${parse(stats.from).getDate()}–${fmtDate(parse(stats.to),{day:'numeric',month:'short'})}`:`${fmtDate(parse(stats.from),{day:'numeric',month:'short'})} – ${fmtDate(parse(stats.to),{day:'numeric',month:'short'})}`):period==='month'?fmtDate(parse(stats.from),{month:'long',year:'numeric'}):stats.isCapped?'последние 12 месяцев':stats.grouping==='day'?'с первой записи':'';
+ $('#chartTitle').textContent=[summaryActivity,stats.grouping==='month'?'Часы по месяцам':'Часы по дням',scope].filter(Boolean).join(' · ');
+ $('#chartTitle').hidden=!n;
+ const showAll=n<=7,tint=summaryActivity?`background:${color(summaryActivity)}`:'';
+ const bars=$('#bars');bars.style.setProperty('--bar-count',n);$('#barAxis').style.setProperty('--bar-count',n);
+ bars.innerHTML=buckets.map((b,i)=>`<button type="button" class="barcol ${b.isCurrent?'today':''} ${b.isFuture?'future':''}" data-bar="${i}" style="--bar-h:${b.minutes?Math.max(4,b.minutes/max*104):0}px" aria-label="${esc(bucketTitle(b))}: ${b.isFuture?'ещё впереди':b.minutes?hm(b.minutes):'нет записей'}">${b.minutes&&(showAll||i===peak)?`<span class="barval">${fmtHours(b.minutes/60)} ч</span>`:''}${b.minutes?`<span class="bar" style="height:${Math.max(4,b.minutes/max*104)}px;${tint}"></span>`:''}</button>`).join('');
+ $('#barAxis').innerHTML=buckets.map((b,i)=>`<span class="${b.isCurrent?'today':''}">${esc(axisLabel(b,i,n))}</span>`).join('');
+ $('#barReadout').textContent='';
+ let sums={};periodEntries.forEach(x=>sums[x.type]=(sums[x.type]||0)+x.minutes);let ranking=Object.entries(sums).sort((a,b)=>b[1]-a[1]);const allMinutes=ranking.reduce((sum,[,v])=>sum+v,0);let top=ranking[0];
+ const best=stats.bestDay?`Лучший день: <strong>${esc(fmtDate(parse(stats.bestDay.date),{weekday:'short',day:'numeric',month:'short'}))}</strong>, ${hm(stats.bestDay.minutes)}.`:'';
+ const average=days>1?`В среднем ${hm(stats.average)} за активный день. ${best}`:'';
+ $('#insight').innerHTML=summaryActivity?(total?`${average} Всего <strong>${arr.length} ${plural(arr.length,'занятие','занятия','занятий')}</strong>.`:'В этот период записей по этому занятию нет.'):(top?`${average} Больше всего времени: <strong>${esc(top[0])}</strong>.`:'Пока тут тихо. Добавьте пару занятий — и увидите свой ритм!');
+ $('#breakdown').innerHTML=`<button class="filter-all ${summaryActivity?'':'active'}" id="allActivities">Все занятия</button>`+(ranking.length?ranking.map(([t,v])=>`<button class="breakrow ${summaryActivity===t?'chosen':''}" data-filter-activity="${esc(t)}"><span class="breakname"><i class="dot" style="background:${color(t)}"></i>${esc(t)}</span><span class="breakhrs">${hm(v)} · ${Math.round(v/Math.max(allMinutes,1)*100)}%</span><span class="track"><span class="fill" style="display:block;width:${v/Math.max(...ranking.map(x=>x[1]),1)*100}%;background:${color(t)}"></span></span></button>`).join(''):'<div class="empty" style="padding:22px 0 4px">Пока пусто — скоро здесь появится ваша статистика!</div>');$('#allActivities').onclick=()=>{summaryActivity=null;renderSummary()};document.querySelectorAll('[data-filter-activity]').forEach(b=>b.onclick=()=>{summaryActivity=b.dataset.filterActivity;renderSummary()});
 }
 function storeGoals(){localStorage.setItem(GOAL_KEY,JSON.stringify(goals));localStorage.setItem(DELETED_GOALS_KEY,JSON.stringify([...deletedGoals]));localStorage.setItem(GOAL_CHANGES_KEY,JSON.stringify(goalChanges))}function persistGoals(){storeGoals();scheduleSync()}
 
@@ -790,7 +838,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))window.add
 
 // A phone keeps an installed app in memory for days, so check for a new version when it comes
 // back. Without this it could keep running old code. Skipped while someone is typing or in a dialog.
-const APP_VERSION_FILES=['./','sync-merge.js','timer-logic.js','day-summary.js','backup-reminder.js'];
+const APP_VERSION_FILES=['./','sync-merge.js','timer-logic.js','day-summary.js','backup-reminder.js','stats.js'];
 const UPDATE_CHECK_EVERY_MS=10*60000;
 let loadedVersion=null,lastUpdateCheck=0;
 // Compares the files' actual contents, because not every host sends version headers for them.
