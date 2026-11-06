@@ -133,7 +133,30 @@
     return { ...view, total, activeDays, bestDay, average: activeDays ? Math.round(total / activeDays) : 0 };
   }
 
-  const api = { periodStats };
+  // Most-used activities first, by entries in the last 30 days. Ties and unused activities
+  // keep the person's own order.
+  function orderByUse(names, entries, today) {
+    const since = toDate(toNumber(today) - 29);
+    const uses = new Map();
+    for (const e of entries) if (e.date >= since && e.date <= today) uses.set(e.type, (uses.get(e.type) || 0) + 1);
+    return names
+      .map((name, index) => ({ name, index, count: uses.get(name) || 0 }))
+      .sort((a, b) => b.count - a.count || a.index - b.index)
+      .map((item) => item.name);
+  }
+
+  // The activity logged most recently, among those on offer.
+  function lastUsed(names, entries) {
+    let latest = null;
+    for (const e of entries) {
+      if (!names.includes(e.type)) continue;
+      const moment = `${e.date} ${e.end || ''}`;
+      if (!latest || moment > latest.moment) latest = { moment, type: e.type };
+    }
+    return latest ? latest.type : null;
+  }
+
+  const api = { periodStats, orderByUse, lastUsed };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.StatsLogic = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -295,7 +295,7 @@ body.timer-bar-on .toast{bottom:92px}
 .live-timer.needs-check .timer-state{color:#f3c6d6;font-weight:500}
 .stop-error{margin:6px 0 0;font-size:13px;color:var(--rose)}
 .stop-discard{display:block;margin:2px 0 0;padding:8px 0;border:0;background:transparent;color:var(--rose);font-size:14px;text-decoration:underline;text-underline-offset:2px}
-.backup-note{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 18px;padding:12px 16px;border:1px solid var(--line-strong);border-radius:16px;background:var(--surface);font-size:14px;font-weight:500}
+.backup-note{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;border:1px solid var(--line-strong);border-radius:16px;background:var(--surface);font-size:14px;font-weight:500}
 .backup-actions{display:flex;gap:8px;flex-shrink:0}
 
 .install-steps{margin:0 0 14px;padding-left:22px;font-size:15px}
@@ -311,6 +311,7 @@ body.timer-bar-on .toast{bottom:92px}
 .comparison .ic{width:15px;height:15px}
 .bars{display:grid;grid-template-columns:repeat(var(--bar-count,7),minmax(0,1fr));height:132px;border-bottom:1px solid var(--line-strong)}
 .barcol{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-width:0;height:100%;padding:0 1px;border:0;border-radius:6px 6px 0 0;background:transparent;cursor:default}
+.barcol[data-day],.barcol[data-month]{cursor:pointer}
 .barcol:focus-visible{outline-offset:-2px}
 .bar{display:block;width:100%;max-width:26px;border-radius:4px 4px 0 0;background:#8273bd}
 .barcol.today .bar{background:#3a2f5f}
@@ -320,8 +321,15 @@ body.timer-bar-on .toast{bottom:92px}
 .bar-axis{display:grid;grid-template-columns:repeat(var(--bar-count,7),minmax(0,1fr));margin-top:5px;font-size:12px;color:var(--ink-3)}
 .bar-axis span{text-align:center;white-space:nowrap;min-width:0}
 .bar-axis .today{color:var(--ink);font-weight:600}
-.bar-readout{min-height:20px;margin-top:6px;font-size:13px;font-weight:500}
-.bar-readout::first-letter{text-transform:uppercase}
+.bars{touch-action:pan-y}
+.bar-readout{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:38px;margin-top:4px;font-size:13px;font-weight:500}
+.bar-readout span{display:inline-block}
+.bar-readout span::first-letter{text-transform:uppercase}
+.bar-readout em{font-style:normal;font-weight:400;font-size:12px;color:var(--ink-2);text-align:right}
+.readout-open{flex:none;min-height:36px;padding:6px 10px;border:1px solid #b9aed6;border-radius:10px;background:#ffffff99;color:var(--ink);font-size:13px;font-weight:500}
+.readout-open:hover{background:#fff}
+.chip-order{display:flex;align-items:center;gap:8px;min-height:36px;margin:0 0 8px;font-size:14px;cursor:pointer}
+.chip-order input{width:18px;height:18px;flex:none;accent-color:var(--accent)}
 
 
 .sync-status:empty{display:none}
@@ -332,8 +340,8 @@ body.timer-bar-on .toast{bottom:92px}
  .savehint{display:none}
  .layout{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
  .layout>main,.layout>aside,.lower{display:contents}
- .entry,.highlight-card,.day-card{grid-column:1/-1}
- .entry,.highlight-card{order:1}.day-card{order:2}.summary{order:3}.breakdown{order:4}.goals-card{order:5}.calendar-card{order:6}.habits-card{order:7}.types-card{order:8}
+ .entry,.highlight-card,.day-card,.backup-note{grid-column:1/-1}
+ .entry,.highlight-card{order:1}.day-card,.backup-note{order:2}.summary{order:3}.breakdown{order:4}.goals-card{order:5}.calendar-card{order:6}.habits-card{order:7}.types-card{order:8}
 }
 /* Phones */
 @media(max-width:640px){
@@ -366,7 +374,8 @@ body.timer-bar-on .toast{bottom:92px}
  .item-body{grid-column:3;grid-row:1}
  .itemduration{grid-column:3;grid-row:2;font-size:13px;font-weight:400;color:var(--ink-2)}
  .itemtools{grid-column:4;grid-row:1/3;align-self:center;margin-right:-8px}
- .highlight-card{padding:14px 16px;gap:11px}.highlight-icon{width:32px;height:32px}.highlight-icon .ic{width:16px;height:16px}#daySummary{font-size:18px}
+ .highlight-card{padding:11px 15px}.highlight-icon{display:none}.highlight-label{font-size:12px}#daySummary{margin-top:0;font-size:17px;line-height:1.3}
+ .backup-note{padding:10px 14px}.backup-actions{width:100%}.backup-actions .btn{flex:1;min-height:40px}
  .breakdown{padding:8px 6px}
  .sync-dialog{padding:22px 18px}
  .sync-head h2{font-size:22px}
@@ -399,22 +408,22 @@ body.timer-bar-on .toast{bottom:92px}
 <dialog class="sync-dialog ask-dialog" id="askDialog"><div class="sync-head"><div><h2 id="askTitle"></h2><p id="askText"></p></div></div><div class="sync-field" id="askField"><label for="askInput" id="askLabel"></label><input id="askInput" maxlength="60" autocomplete="off"></div><div class="sync-buttons"><button class="btn primary" id="askConfirm"></button><button class="btn" id="askCancel"></button></div></dialog>
 <dialog class="sync-dialog" id="stopDialog"><div class="sync-head"><div><h2>Точно завершить занятие?</h2><p>Занятие остановится и появится в списке дня.</p></div></div><div class="stop-summary" id="stopSummary"></div><div class="sync-field"><label for="stopTime">Когда закончили</label><input id="stopTime" type="time"><p class="stop-error" id="stopError" hidden>Это время раньше начала занятия.</p></div><div class="sync-field"><label for="stopNote">Заметка (необязательно)</label><input id="stopNote" placeholder="Что-нибудь запомнить"></div><div class="sync-buttons"><button class="btn primary" id="stopConfirm">Да, завершить</button><button class="btn" id="stopCancel">Нет, продолжить</button></div><button class="stop-discard" id="stopDiscard">Удалить без сохранения</button></dialog>
 <div class="hero"><div><div class="eyebrow" id="dailyPhrase">Маленькие шаги — тоже дела!</div><h1 id="greeting">Чем сегодня займёмся?</h1></div><div class="date-nav"><button class="iconbtn" id="prevDay" aria-label="Предыдущий день"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button><div class="date-display" id="dateDisplay"></div><button class="iconbtn" id="nextDay" aria-label="Следующий день"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button><button class="btn" id="todayBtn">Сегодня</button></div></div>
-<div class="backup-note" id="backupNote" hidden><span id="backupText"></span><div class="backup-actions"><button class="btn primary" id="backupNow">Скачать копию</button><button class="btn" id="backupLater">Позже</button></div></div>
 <div class="layout"><main>
 <section class="card entry"><div class="edit-banner" id="editBanner">Редактирование занятия <button type="button" id="cancelEdit">Отменить</button></div><h2 class="cardtitle" id="entryTitle">Добавить занятие</h2><div class="activity-grid" id="activityGrid"></div>
 <div class="live-timer" id="liveTimer"></div><details class="manual-entry" id="manualEntry"><summary><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg>Указать время вручную</summary><div class="manual-fields"><div class="field"><label for="start">Начало</label><input class="input" type="time" id="start" value="09:00"></div><div class="field"><label for="end">Конец</label><input class="input" type="time" id="end" value="10:00"></div><div class="field note-field"><label for="note">Заметка <span>(необязательно)</span></label><input class="input" id="note" placeholder="Что-нибудь запомнить"></div></div>
 <div class="overlap-warning" id="overlapWarning"></div><div class="entryactions"><div class="duration">Длительность<strong id="duration">1 ч</strong></div><button class="btn primary" id="addBtn">Добавить</button></div></details></section>
 <section class="card highlight-card"><div class="highlight-icon"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></div><div class="highlight-body"><div class="highlight-label">Итог дня</div><p id="daySummary" aria-live="polite"></p></div></section>
 <section class="card day-card"><div class="card-head"><div><h2 class="cardtitle">Мой день</h2><div class="sub" id="daySub">Занятия за день</div></div><span class="count" id="entryCount">0 записей</span></div><div class="entries" id="entries"></div></section>
+<div class="backup-note" id="backupNote" hidden><span id="backupText"></span><div class="backup-actions"><button class="btn" id="backupNow">Скачать копию</button><button class="btn" id="backupLater">Позже</button></div></div>
 <div class="lower">
 <section class="card breakdown"><h2 class="cardtitle">Занятия</h2><div class="sub">На что ушло время</div><div id="breakdown"></div></section>
 <section class="card habits-card"><div class="pattern-head"><div><h2 class="cardtitle">Ваши привычки</h2><div class="sub">В какие дни что нравится делать</div></div><select id="patternType" aria-label="Занятие для анализа"></select></div><div class="pattern-days" id="patternDays"></div><p class="pattern-copy" id="patternCopy"></p></section>
 </div>
 </main><aside class="side">
-<section class="card summary"><h2 class="cardtitle">Мой ритм</h2><div class="sub">Смотрите, что радует чаще</div><div class="period" id="period"><button data-period="week" class="active">Неделя</button><button data-period="month">Месяц</button><button data-period="all">Всё время</button></div><div class="stats"><div class="stat" title="Одновременные занятия учитываются отдельно"><b id="totalHours">0 мин</b><span>всего времени</span></div><div class="stat"><b id="activeDays">0</b><span id="activeDaysLabel">активных дней</span></div></div><p class="comparison" id="comparison" hidden></p><h3 class="charttitle" id="chartTitle">Часы по дням</h3><div class="bars" id="bars" role="group" aria-labelledby="chartTitle"></div><div class="bar-axis" id="barAxis" aria-hidden="true"></div><div class="bar-readout" id="barReadout" aria-live="polite"></div><div class="insight" id="insight">Пока тут тихо. Добавьте пару занятий — и увидите свой ритм!</div></section>
+<section class="card summary"><h2 class="cardtitle">Мой ритм</h2><div class="sub">Смотрите, что радует чаще</div><div class="period" id="period"><button data-period="week" class="active" aria-pressed="true">Неделя</button><button data-period="month" aria-pressed="false">Месяц</button><button data-period="all" aria-pressed="false">Всё время</button></div><div class="stats"><div class="stat" title="Одновременные занятия учитываются отдельно"><b id="totalHours">0 мин</b><span>всего времени</span></div><div class="stat"><b id="activeDays">0</b><span id="activeDaysLabel">активных дней</span></div></div><p class="comparison" id="comparison" hidden></p><h3 class="charttitle" id="chartTitle">Часы по дням</h3><div class="bars" id="bars" role="group" aria-labelledby="chartTitle"></div><div class="bar-axis" id="barAxis" aria-hidden="true"></div><div class="bar-readout" id="barReadout" aria-live="polite"></div><div class="insight" id="insight">Пока тут тихо. Добавьте пару занятий — и увидите свой ритм!</div></section>
 <section class="card goals-card"><h2 class="cardtitle">Недельные цели</h2><div class="sub">Поставьте себе цель — в своём темпе</div><div class="goal-form"><select id="goalType" aria-label="Занятие для цели"></select><input id="goalHours" type="number" min="0.5" step="0.5" value="3" aria-label="Часов в неделю"><button class="btn primary" id="saveGoal">Добавить</button></div><div id="goals"></div></section>
 <section class="card calendar-card"><div class="card-head"><div><h2 class="cardtitle">Календарь</h2><div class="sub">Ваши активные дни</div></div><div class="mini-nav"><button class="iconbtn" id="calPrev" aria-label="Предыдущий месяц"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button><button class="iconbtn" id="calNext" aria-label="Следующий месяц"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button></div></div><div class="calendar-title" id="calMonth"></div><div class="calgrid" id="calendar"></div><div class="cal-legend"><span>Меньше</span><i class="cal-swatch"></i><i class="cal-swatch l2"></i><i class="cal-swatch l3"></i><span>Больше</span><span class="cal-selected-key"><i></i> Выбранный день</span></div></section>
-<section class="card types-card"><details class="types-panel"><summary><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg><h2 class="cardtitle">Мои занятия</h2><div class="sub">Добавляйте и настраивайте список</div></summary><div class="type-add"><input class="input" id="newType" placeholder="Например, прогулка" aria-label="Новое занятие"><button class="btn primary" id="addType">Добавить</button></div><p class="manage-hint">Можно переименовывать, менять порядок и скрывать ненужные занятия.</p><div class="type-list" id="typeList"></div></details></section>
+<section class="card types-card"><details class="types-panel"><summary><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg><h2 class="cardtitle">Мои занятия</h2><div class="sub">Добавляйте и настраивайте список</div></summary><div class="type-add"><input class="input" id="newType" placeholder="Например, прогулка" aria-label="Новое занятие"><button class="btn primary" id="addType">Добавить</button></div><p class="manage-hint">Можно переименовывать, менять порядок и скрывать ненужные занятия.</p><label class="chip-order"><input type="checkbox" id="chipsByUse"> Сначала показывать частые занятия</label><div class="type-list" id="typeList"></div></details></section>
 </aside></div></div><div class="timer-bar" id="timerBar"></div><div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script><script src="sync-merge.js"></script><script src="timer-logic.js"></script><script src="day-summary.js"></script><script src="backup-reminder.js"></script><script src="stats.js"></script><script>
 function readJSON(key,fallback){try{let value=JSON.parse(localStorage.getItem(key));return value===null||value===undefined?fallback:value}catch(_){return fallback}}
@@ -430,7 +439,14 @@ function iso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'
 function fmtHours(h){return new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(h)}
 function joinRu(list){return list.length<2?list.join(''):`${list.slice(0,-1).join(', ')} и ${list.at(-1)}`}
 function hm(n){n=Math.max(0,Math.round(n));let h=Math.floor(n/60),m=n%60;if(!h)return `${m} мин`;return m?`${h} ч ${String(m).padStart(2,'0')} мин`:`${h} ч`}function plural(n,one,few,many){let a=Math.abs(n)%100,b=a%10;if(a>10&&a<20)return many;if(b===1)return one;return b>=2&&b<=4?few:many}function storeEntries(){localStorage.setItem(KEY,JSON.stringify(data));localStorage.setItem(DELETED_KEY,JSON.stringify([...deletedIds]))}function save(){storeEntries();scheduleSync()}let toastTimer=null;function showToast(ms){let t=$('#toast');t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show','has-action'),ms)}function toast(s){let t=$('#toast');t.classList.remove('has-action');t.textContent=s;showToast(1800)}function toastWithAction(s,label,action){let t=$('#toast');t.textContent=s;let b=document.createElement('button');b.textContent=label;b.onclick=()=>{t.classList.remove('show','has-action');action()};t.append(b);t.classList.add('has-action');showToast(6000)}
-function renderTypes(){if(!editingId&&!TYPES.some(([n])=>n===selected))selected=TYPES.find(([n])=>!HIDDEN.has(n))?.[0]||TYPES[0]?.[0]||'';let active=TYPES.filter(([n])=>!HIDDEN.has(n)||n===selected),goalChoice=$('#goalType').value,patternChoice=$('#patternType').value;$('#goalType').innerHTML=TYPES.map(([n])=>`<option value="${esc(n)}">${esc(n)}${HIDDEN.has(n)?' · скрыто':''}</option>`).join('');$('#patternType').innerHTML=TYPES.map(([n])=>`<option value="${esc(n)}">${esc(n)}${HIDDEN.has(n)?' · скрыто':''}</option>`).join('');if(TYPES.some(([n])=>n===goalChoice))$('#goalType').value=goalChoice;else if(TYPES.some(([n])=>n===selected))$('#goalType').value=selected;if(TYPES.some(([n])=>n===patternChoice))$('#patternType').value=patternChoice;else if(TYPES.some(([n])=>n===selected))$('#patternType').value=selected;$('#activityGrid').innerHTML=active.map(([name,c])=>`<button class="activity ${selected===name?'selected':''}" data-type="${esc(name)}"><i class="dot" style="background:${c}"></i>${esc(name)}</button>`).join('');document.querySelectorAll('.activity').forEach(b=>b.onclick=()=>{selected=b.dataset.type;renderTypes()});renderTypeList();renderTimer()}
+// Buttons keep their places while the app is open, so one never moves under a finger:
+// the order is only worked out when the app opens or returns, or data arrives from sync.
+const CHIP_ORDER_KEY='daymark-chip-order-v1';
+let chipsByUse=readJSON(CHIP_ORDER_KEY,'use')!=='manual',chipRank=null,selectionTouched=false;
+function refreshChipOrder(){chipRank=new Map(StatsLogic.orderByUse(TYPES.map(([n])=>n),data,iso(new Date())).map((n,i)=>[n,i]))}
+function orderedChips(list){if(!chipsByUse||!chipRank)return list;return list.map((t,i)=>({t,i,r:chipRank.has(t[0])?chipRank.get(t[0]):1e6+i})).sort((a,b)=>a.r-b.r).map(x=>x.t)}
+function preselectLastUsed(){if(selectionTouched||editingId||activeTimer())return;const last=StatsLogic.lastUsed(TYPES.filter(([n])=>!HIDDEN.has(n)).map(([n])=>n),data);if(last)selected=last}
+function renderTypes(){if(!editingId&&!TYPES.some(([n])=>n===selected))selected=TYPES.find(([n])=>!HIDDEN.has(n))?.[0]||TYPES[0]?.[0]||'';let active=TYPES.filter(([n])=>!HIDDEN.has(n)||n===selected),goalChoice=$('#goalType').value,patternChoice=$('#patternType').value;$('#goalType').innerHTML=TYPES.map(([n])=>`<option value="${esc(n)}">${esc(n)}${HIDDEN.has(n)?' · скрыто':''}</option>`).join('');$('#patternType').innerHTML=TYPES.map(([n])=>`<option value="${esc(n)}">${esc(n)}${HIDDEN.has(n)?' · скрыто':''}</option>`).join('');if(TYPES.some(([n])=>n===goalChoice))$('#goalType').value=goalChoice;else if(TYPES.some(([n])=>n===selected))$('#goalType').value=selected;if(TYPES.some(([n])=>n===patternChoice))$('#patternType').value=patternChoice;else if(TYPES.some(([n])=>n===selected))$('#patternType').value=selected;$('#activityGrid').innerHTML=orderedChips(active).map(([name,c])=>`<button class="activity ${selected===name?'selected':''}" aria-pressed="${selected===name}" data-type="${esc(name)}"><i class="dot" style="background:${c}"></i>${esc(name)}</button>`).join('');document.querySelectorAll('.activity').forEach(b=>b.onclick=()=>{selected=b.dataset.type;selectionTouched=true;renderTypes()});renderTypeList();renderTimer()}
 function renderTypeList(){$('#typeList').innerHTML=TYPES.map(([name,c],i)=>`<div class="type-item ${HIDDEN.has(name)?'hidden-type':''}"><input class="type-color" type="color" value="${/^#[0-9a-f]{6}$/i.test(c)?c:'#95c99a'}" data-color="${i}" title="Изменить цвет: ${esc(name)}" aria-label="Цвет занятия ${esc(name)}"><span class="type-name">${esc(name)}${HIDDEN.has(name)?' · скрыто':''}</span><button data-move="up" data-index="${i}" title="Выше" aria-label="Выше: ${esc(name)}">${ic('up')}</button><button data-move="down" data-index="${i}" title="Ниже" aria-label="Ниже: ${esc(name)}">${ic('down')}</button><button data-rename="${i}" title="Переименовать" aria-label="Переименовать ${esc(name)}">${ic('edit')}</button><button data-hide="${i}" title="${HIDDEN.has(name)?'Показать':'Скрыть'}" aria-label="${HIDDEN.has(name)?'Показать':'Скрыть'} ${esc(name)}">${ic(HIDDEN.has(name)?'eye-off':'eye')}</button><button class="type-delete" data-delete="${i}" title="Удалить занятие" aria-label="Удалить занятие ${esc(name)}">${ic('close')}</button></div>`).join('')}
 // The app's own question box. Resolves true/false, or with `input`, the text or null.
 // Questions wait their turn if one is already showing.
@@ -476,7 +492,7 @@ function renderBackupNote(){
  const oldest=data.reduce((first,x)=>!first||x.date<first?x.date:first,null);
  const due=BackupReminder.reminder({lastBackup:readJSON(LAST_BACKUP_KEY,null),snoozedUntil:readJSON(BACKUP_SNOOZE_KEY,null),now:Date.now(),oldestEntry:oldest?parse(oldest).getTime():null});
  $('#backupNote').hidden=!due;
- if(due)$('#backupText').textContent=due.never?'Вы ещё не сохраняли резервную копию своих данных.':`Последняя резервная копия: ${due.days} ${plural(due.days,'день','дня','дней')} назад.`;
+ if(due)$('#backupText').textContent=due.never?'Резервной копии ещё нет.':`Последняя копия: ${due.days} ${plural(due.days,'день','дня','дней')} назад.`;
 }
 const JOKES_KEY='daymark-jokes-v1';
 let jokesOn=readJSON(JOKES_KEY,true)!==false;
@@ -507,17 +523,35 @@ function comparisonText(c){
  if(!diff)return {text:`Столько же, сколько ${place}`,icon:null};
  return {text:`На ${hm(Math.abs(diff))} ${diff>0?'больше':'меньше'}, чем ${place}`,icon:diff>0?'up':'down'};
 }
+// A mouse or keyboard opens a day from the bar itself, because crossing the chart to reach a
+// button would change the selected day on the way. Touch has no hover, so a tap shows the day
+// with a button, and sliding a finger moves through the days, so thin bars are easy to pick.
+let barInput='mouse',shownBar=null;
+// The month opened from "Всё время". It lasts until the period or the selected day changes.
+let chartMonth=null,chartMonthDay=null;
+function setPeriodTabs(){document.querySelectorAll('#period button').forEach(x=>{const on=x.dataset.period===period;x.classList.toggle('active',on);x.setAttribute('aria-pressed',on)})}
+function openMonthFromChart(key){period='month';chartMonth=`${key}-01`;chartMonthDay=iso(date);setPeriodTabs();renderSummary()}
 function showBarReadout(i){
  const column=$('#bars').querySelector(`[data-bar="${i}"]`);if(!column)return;
+ const shown=`${i}|${barInput}`;if(shownBar===shown&&column.classList.contains('active'))return;
+ shownBar=shown;
  document.querySelectorAll('#bars .active').forEach(x=>x.classList.remove('active'));
- column.classList.add('active');$('#barReadout').textContent=column.getAttribute('aria-label');
+ column.classList.add('active');
+ const day=column.dataset.day,month=column.dataset.month,label=esc(column.getAttribute('aria-label'));
+ const hasAction=day||month,word=month?'месяц':'день',attr=month?`data-open-month="${esc(month)}"`:`data-open="${esc(day||'')}"`;
+ $('#barReadout').innerHTML=!hasAction?`<span>${label}</span>`:barInput==='touch'?`<span>${label}</span><button type="button" class="readout-open" ${attr}>Открыть ${word}</button>`:`<span>${label}</span><em>Нажмите, чтобы открыть ${word}</em>`;
 }
-$('#bars').addEventListener('pointerover',e=>{const c=e.target.closest('[data-bar]');if(c)showBarReadout(c.dataset.bar)});
-$('#bars').addEventListener('focusin',e=>{const c=e.target.closest('[data-bar]');if(c)showBarReadout(c.dataset.bar)});
-$('#bars').addEventListener('click',e=>{const c=e.target.closest('[data-bar]');if(c)showBarReadout(c.dataset.bar)});
-$('#bars').addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){document.querySelectorAll('#bars .active').forEach(x=>x.classList.remove('active'));$('#barReadout').textContent=''}});
+function barFromPointer(e){const n=$('#bars').children.length,box=$('#bars').getBoundingClientRect();if(!n||!box.width)return;showBarReadout(Math.min(n-1,Math.max(0,Math.floor((e.clientX-box.left)/box.width*n))))}
+function openDayFromChart(key){date=parse(key);render();document.querySelector('.day-card').scrollIntoView({behavior:'smooth',block:'start'})}
+$('#bars').addEventListener('pointerdown',e=>{barInput=e.pointerType==='mouse'?'mouse':'touch';barFromPointer(e)});
+$('#bars').addEventListener('pointermove',e=>{if(e.pointerType==='mouse'){barInput='mouse';barFromPointer(e)}else if(e.buttons)barFromPointer(e)});
+$('#bars').addEventListener('keydown',()=>{barInput='mouse'});
+$('#bars').addEventListener('focusin',e=>{const c=e.target.closest('[data-bar]');if(c&&barInput==='mouse')showBarReadout(c.dataset.bar)});
+$('#bars').addEventListener('click',e=>{if(barInput==='touch')return;const c=e.target.closest('[data-bar]');if(c?.dataset.day)openDayFromChart(c.dataset.day);else if(c?.dataset.month)openMonthFromChart(c.dataset.month)});
+$('#barReadout').addEventListener('click',e=>{const b=e.target.closest('button');if(b?.dataset.open)openDayFromChart(b.dataset.open);else if(b?.dataset.openMonth)openMonthFromChart(b.dataset.openMonth)});
 function renderSummary(){
- const stats=StatsLogic.periodStats({period,ref:iso(date),today:iso(new Date()),entries:data,type:summaryActivity});
+ if(chartMonth&&chartMonthDay!==iso(date))chartMonth=null;
+ const stats=StatsLogic.periodStats({period,ref:period==='month'&&chartMonth?chartMonth:iso(date),today:iso(new Date()),entries:data,type:summaryActivity});
  const inView=x=>x.date>=stats.from&&x.date<=stats.to;
  const periodEntries=data.filter(inView),arr=summaryActivity?periodEntries.filter(x=>x.type===summaryActivity):periodEntries;
  const total=stats.total,days=stats.activeDays;
@@ -532,9 +566,9 @@ function renderSummary(){
  $('#chartTitle').hidden=!n;
  const showAll=n<=7,tint=summaryActivity?`background:${color(summaryActivity)}`:'';
  const bars=$('#bars');bars.style.setProperty('--bar-count',n);$('#barAxis').style.setProperty('--bar-count',n);
- bars.innerHTML=buckets.map((b,i)=>`<button type="button" class="barcol ${b.isCurrent?'today':''} ${b.isFuture?'future':''}" data-bar="${i}" style="--bar-h:${b.minutes?Math.max(4,b.minutes/max*104):0}px" aria-label="${esc(bucketTitle(b))}: ${b.isFuture?'ещё впереди':b.minutes?hm(b.minutes):'нет записей'}">${b.minutes&&(showAll||i===peak)?`<span class="barval">${fmtHours(b.minutes/60)} ч</span>`:''}${b.minutes?`<span class="bar" style="height:${Math.max(4,b.minutes/max*104)}px;${tint}"></span>`:''}</button>`).join('');
+ bars.innerHTML=buckets.map((b,i)=>`<button type="button" class="barcol ${b.isCurrent?'today':''} ${b.isFuture?'future':''}" data-bar="${i}" ${b.kind==='day'&&!b.isFuture?`data-day="${b.key}"`:''} ${b.kind==='month'?`data-month="${b.key}"`:''} style="--bar-h:${b.minutes?Math.max(4,b.minutes/max*104):0}px" aria-label="${esc(bucketTitle(b))}: ${b.isFuture?'ещё впереди':b.minutes?hm(b.minutes):'нет записей'}">${b.minutes&&(showAll||i===peak)?`<span class="barval">${fmtHours(b.minutes/60)} ч</span>`:''}${b.minutes?`<span class="bar" style="height:${Math.max(4,b.minutes/max*104)}px;${tint}"></span>`:''}</button>`).join('');
  $('#barAxis').innerHTML=buckets.map((b,i)=>`<span class="${b.isCurrent?'today':''}">${esc(axisLabel(b,i,n))}</span>`).join('');
- $('#barReadout').textContent='';
+ $('#barReadout').textContent='';shownBar=null;
  let sums={};periodEntries.forEach(x=>sums[x.type]=(sums[x.type]||0)+x.minutes);let ranking=Object.entries(sums).sort((a,b)=>b[1]-a[1]);const allMinutes=ranking.reduce((sum,[,v])=>sum+v,0);let top=ranking[0];
  const best=stats.bestDay?`Лучший день: <strong>${esc(fmtDate(parse(stats.bestDay.date),{weekday:'short',day:'numeric',month:'short'}))}</strong>, ${hm(stats.bestDay.minutes)}.`:'';
  const average=days>1?`В среднем ${hm(stats.average)} за активный день. ${best}`:'';
@@ -663,7 +697,7 @@ $('#addBtn').onclick=()=>{
   timesTouched=true;setTimes(TimerLogic.followingTimes(end,new Date()));
   render();toast('Занятие сохранено');
  }
-};$('#prevDay').onclick=()=>{date.setDate(date.getDate()-1);render()};$('#nextDay').onclick=()=>{date.setDate(date.getDate()+1);render()};$('#todayBtn').onclick=()=>{date=new Date();date.setHours(0,0,0,0);render()};$('#period').onclick=e=>{let b=e.target.closest('button[data-period]');if(!b)return;period=b.dataset.period;document.querySelectorAll('#period button').forEach(x=>x.classList.toggle('active',x===b));renderSummary()};$('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{let parsed=JSON.parse(await file.text());let added=importBackup(parsed);render();toast(added?`Импортировано записей: ${added}`:'Новых записей не найдено')}catch(_){toast('Не удалось прочитать файл резервной копии')}e.target.value=''};function exportBackup(){let blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),...cloudPayload()},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`aktivnosti-${iso(new Date())}.json`;a.click();URL.revokeObjectURL(a.href);localStorage.setItem(LAST_BACKUP_KEY,JSON.stringify(Date.now()));renderBackupNote();toast('Резервная копия сохранена')}
+};$('#prevDay').onclick=()=>{date.setDate(date.getDate()-1);render()};$('#nextDay').onclick=()=>{date.setDate(date.getDate()+1);render()};$('#todayBtn').onclick=()=>{date=new Date();date.setHours(0,0,0,0);render()};$('#period').onclick=e=>{let b=e.target.closest('button[data-period]');if(!b)return;period=b.dataset.period;chartMonth=null;setPeriodTabs();renderSummary()};$('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{let parsed=JSON.parse(await file.text());let added=importBackup(parsed);render();toast(added?`Импортировано записей: ${added}`:'Новых записей не найдено')}catch(_){toast('Не удалось прочитать файл резервной копии')}e.target.value=''};function exportBackup(){let blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),...cloudPayload()},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`aktivnosti-${iso(new Date())}.json`;a.click();URL.revokeObjectURL(a.href);localStorage.setItem(LAST_BACKUP_KEY,JSON.stringify(Date.now()));renderBackupNote();toast('Резервная копия сохранена')}
 $('#exportBtn').onclick=exportBackup;$('#backupNow').onclick=exportBackup;$('#backupLater').onclick=()=>{localStorage.setItem(BACKUP_SNOOZE_KEY,JSON.stringify(BackupReminder.snoozeUntil(Date.now())));renderBackupNote()};
 // Restores entries, activities and goals from a backup. Older backups hold entries only:
 // activities they mention that are missing here get created rather than the entries skipped.
@@ -805,7 +839,7 @@ async function syncCloud(manual){
     setSyncStatus('Синхронизация не включена. Данные остаются на этом устройстве.');setSyncHint('off','Данные хранятся на этом устройстве');return;
    }
    const local=cloudPayload(),merged=DaymarkMerge.mergeStates(local,row?.data);
-   if(DaymarkMerge.canonical(merged)!==DaymarkMerge.canonical(local)){adoptState(merged);renderTypes();render()}
+   if(DaymarkMerge.canonical(merged)!==DaymarkMerge.canonical(local)){adoptState(merged);refreshChipOrder();preselectLastUsed();renderTypes();render()}
    if(row&&DaymarkMerge.canonical(merged)===DaymarkMerge.canonical(row.data))written=true;
    else written=await writeCloudRow(session.user.id,row,merged);
   }
@@ -862,10 +896,12 @@ async function checkForUpdate(){
   else if(!loadedVersion)loadedVersion=version;
  }catch(_){}
 }
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkForUpdate()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){checkForUpdate();if(!document.querySelector('dialog[open]')){refreshChipOrder();renderTypes()}}});
 checkForUpdate();
+$('#chipsByUse').checked=chipsByUse;
+$('#chipsByUse').onchange=e=>{chipsByUse=e.target.checked;localStorage.setItem(CHIP_ORDER_KEY,JSON.stringify(chipsByUse?'use':'manual'));refreshChipOrder();renderTypes()};
 $('#manualEntry').open=matchMedia('(min-width:641px)').matches;
 $('#moreMenu').addEventListener('click',e=>{if(e.target.closest('.more-list button'))$('#moreMenu').open=false});
 document.addEventListener('click',e=>{if(!e.target.closest('#moreMenu'))$('#moreMenu').open=false});
-renderTypes();refreshDefaultTimes();updateDuration();render();
+refreshChipOrder();preselectLastUsed();renderTypes();refreshDefaultTimes();updateDuration();render();
 </script></body></html>

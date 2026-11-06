@@ -1,7 +1,7 @@
 // Run with: node --test tests/
 const test = require('node:test');
 const assert = require('node:assert');
-const { periodStats } = require('../stats.js');
+const { periodStats, orderByUse, lastUsed } = require('../stats.js');
 
 const TODAY = '2026-11-05'; // A Thursday.
 const e = (date, minutes, type = 'работа') => ({ date, minutes, type });
@@ -114,4 +114,30 @@ test('filtering by activity applies to bars, totals and the comparison', () => {
   assert.equal(s.total, 100);
   assert.equal(s.comparison.previous, 40);
   assert.equal(s.buckets[1].minutes, 100);
+});
+
+test('most-used activities come first, by entries in the last 30 days', () => {
+  const entries = [e('2026-11-01', 10, 'ходьба'), e('2026-11-02', 10, 'ходьба'), e('2026-11-03', 500, 'работа')];
+  assert.deepEqual(orderByUse(['работа', 'чтение', 'ходьба'], entries, TODAY), ['ходьба', 'работа', 'чтение']);
+});
+
+test('old entries do not count, and ties keep the person\'s own order', () => {
+  const entries = [e('2026-10-06', 10, 'старое'), e('2026-10-07', 10, 'новое'), e('2026-10-05', 10, 'старое')];
+  assert.deepEqual(orderByUse(['старое', 'новое', 'третье'], entries, TODAY), ['новое', 'старое', 'третье']);
+  assert.deepEqual(orderByUse(['б', 'а'], [], TODAY), ['б', 'а']);
+});
+
+test('future entries do not count towards use', () => {
+  assert.deepEqual(orderByUse(['а', 'б'], [e('2026-11-20', 10, 'б')], TODAY), ['а', 'б']);
+});
+
+test('the last used activity is the most recent entry on offer', () => {
+  const entries = [
+    { date: '2026-11-05', end: '09:00', type: 'работа', minutes: 1 },
+    { date: '2026-11-05', end: '20:00', type: 'чтение', minutes: 1 },
+    { date: '2026-11-04', end: '23:00', type: 'ходьба', minutes: 1 },
+  ];
+  assert.equal(lastUsed(['работа', 'чтение', 'ходьба'], entries), 'чтение');
+  assert.equal(lastUsed(['работа', 'ходьба'], entries), 'работа');
+  assert.equal(lastUsed(['работа'], []), null);
 });
