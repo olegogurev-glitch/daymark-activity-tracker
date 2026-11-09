@@ -96,6 +96,11 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .timer-add:not(:disabled):hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
 .timer-add b{font-weight:600;color:var(--ink)}
 .timer-add .plus{font-size:20px;line-height:1;font-weight:500}
+.timer-add.open{border-style:solid;border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.timer-pick{padding:12px 14px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2)}
+.timer-pick-title{margin-bottom:10px;font-size:14px;color:var(--ink-2)}
+.timer-pick-list{display:flex;flex-wrap:wrap;gap:6px}
+.timer-pick .activity{background:var(--surface)}
 .timer-buttons{display:flex;gap:8px;flex-wrap:wrap}
 .live-timer .btn,.timer-bar .btn{border-color:#ffffff38;background:#ffffff14;color:#fff;min-height:46px;padding:10px 18px}
 .live-timer .btn:hover,.timer-bar .btn:hover{background:#ffffff26;border-color:#ffffff60}
@@ -502,7 +507,7 @@ let chipsByUse=readJSON(CHIP_ORDER_KEY,'use')!=='manual',chipRank=null,selection
 function refreshChipOrder(){chipRank=new Map(StatsLogic.orderByUse(TYPES.map(([n])=>n),data,iso(new Date())).map((n,i)=>[n,i]))}
 function orderedChips(list){if(!chipsByUse||!chipRank)return list;return list.map((t,i)=>({t,i,r:chipRank.has(t[0])?chipRank.get(t[0]):1e6+i})).sort((a,b)=>a.r-b.r).map(x=>x.t)}
 function preselectLastUsed(){if(selectionTouched||editingId||activeTimers().length)return;const last=StatsLogic.lastUsed(TYPES.filter(([n])=>!HIDDEN.has(n)).map(([n])=>n),data);if(last)selected=last}
-function renderTypes(){if(!editingId&&!TYPES.some(([n])=>n===selected))selected=TYPES.find(([n])=>!HIDDEN.has(n))?.[0]||TYPES[0]?.[0]||'';let active=TYPES.filter(([n])=>!HIDDEN.has(n)||n===selected),goalChoice=$('#goalType').value,patternChoice=$('#patternType').value;$('#goalType').innerHTML=TYPES.map(([n])=>`<option value="${esc(n)}">${esc(n)}${HIDDEN.has(n)?' · скрыто':''}</option>`).join('');$('#patternType').innerHTML=TYPES.map(([n])=>`<option value="${esc(n)}">${esc(n)}${HIDDEN.has(n)?' · скрыто':''}</option>`).join('');if(TYPES.some(([n])=>n===goalChoice))$('#goalType').value=goalChoice;else if(TYPES.some(([n])=>n===selected))$('#goalType').value=selected;if(TYPES.some(([n])=>n===patternChoice))$('#patternType').value=patternChoice;else if(TYPES.some(([n])=>n===selected))$('#patternType').value=selected;$('#activityGrid').innerHTML=orderedChips(active).map(([name,c])=>`<button class="activity ${selected===name?'selected':''}" aria-pressed="${selected===name}" data-type="${esc(name)}"><i class="dot" style="background:${c}"></i>${esc(name)}</button>`).join('');document.querySelectorAll('.activity').forEach(b=>b.onclick=()=>{selected=b.dataset.type;selectionTouched=true;renderTypes()});renderTypeList();renderTimer()}
+function renderTypes(){if(!editingId&&!TYPES.some(([n])=>n===selected))selected=TYPES.find(([n])=>!HIDDEN.has(n))?.[0]||TYPES[0]?.[0]||'';let active=TYPES.filter(([n])=>!HIDDEN.has(n)||n===selected),goalChoice=$('#goalType').value,patternChoice=$('#patternType').value;$('#goalType').innerHTML=TYPES.map(([n])=>`<option value="${esc(n)}">${esc(n)}${HIDDEN.has(n)?' · скрыто':''}</option>`).join('');$('#patternType').innerHTML=TYPES.map(([n])=>`<option value="${esc(n)}">${esc(n)}${HIDDEN.has(n)?' · скрыто':''}</option>`).join('');if(TYPES.some(([n])=>n===goalChoice))$('#goalType').value=goalChoice;else if(TYPES.some(([n])=>n===selected))$('#goalType').value=selected;if(TYPES.some(([n])=>n===patternChoice))$('#patternType').value=patternChoice;else if(TYPES.some(([n])=>n===selected))$('#patternType').value=selected;$('#activityGrid').innerHTML=orderedChips(active).map(([name,c])=>`<button class="activity ${selected===name?'selected':''}" aria-pressed="${selected===name}" data-type="${esc(name)}"><i class="dot" style="background:${c}"></i>${esc(name)}</button>`).join('');document.querySelectorAll('#activityGrid .activity').forEach(b=>b.onclick=()=>{selected=b.dataset.type;selectionTouched=true;renderTypes()});renderTypeList();renderTimer()}
 function renderTypeList(){$('#typeList').innerHTML=TYPES.map(([name,c],i)=>`<div class="type-item ${HIDDEN.has(name)?'hidden-type':''}"><input class="type-color" type="color" value="${/^#[0-9a-f]{6}$/i.test(c)?c:'#95c99a'}" data-color="${i}" title="Изменить цвет: ${esc(name)}" aria-label="Цвет занятия ${esc(name)}"><span class="type-name">${esc(name)}${HIDDEN.has(name)?' · скрыто':''}</span><button data-move="up" data-index="${i}" title="Выше" aria-label="Выше: ${esc(name)}">${ic('up')}</button><button data-move="down" data-index="${i}" title="Ниже" aria-label="Ниже: ${esc(name)}">${ic('down')}</button><button data-rename="${i}" title="Переименовать" aria-label="Переименовать ${esc(name)}">${ic('edit')}</button><button data-hide="${i}" title="${HIDDEN.has(name)?'Показать':'Скрыть'}" aria-label="${HIDDEN.has(name)?'Показать':'Скрыть'} ${esc(name)}">${ic(HIDDEN.has(name)?'eye-off':'eye')}</button><button class="type-delete" data-delete="${i}" title="Удалить занятие" aria-label="Удалить занятие ${esc(name)}">${ic('close')}</button></div>`).join('')}
 // The app's own question box. Resolves true/false, or with `input`, the text or null.
 // Questions wait their turn if one is already showing.
@@ -682,16 +687,18 @@ function renderTimer(){
   box.innerHTML=`<div class="live-timer"><div class="timer-info"><div class="timer-label">Таймер</div><div class="timer-name">${esc(selected||'Выберите занятие')}</div></div><div class="timer-buttons"><button class="btn primary" data-timer="start" ${selected?'':'disabled'}>${ic('play')}Старт</button></div></div>`;
   bar.innerHTML='';
  }else{
-  // "+" starts one more timer for the activity chosen above, one timer per activity.
-  const free=selected&&!list.some(t=>t.type===selected);
-  box.innerHTML=list.map(t=>timerCard(t,list.length>1)).join('')+`<button class="timer-add" data-timer="start" ${free?'':'disabled'}><span class="plus" aria-hidden="true">+</span>${free?`<span>Ещё таймер: <b>${esc(selected)}</b></span>`:'<span>Для ещё одного таймера выберите занятие выше</span>'}</button>`;
+  // "+" opens a list of activities that have no timer yet; tapping one starts its timer.
+  const free=orderedChips(TYPES.filter(([n])=>!HIDDEN.has(n)&&!list.some(t=>t.type===n)));
+  if(!free.length)pickingTimer=false;
+  const picker=pickingTimer?`<div class="timer-pick"><div class="timer-pick-title">Какое занятие запустить?</div><div class="timer-pick-list">${free.map(([n,c])=>`<button class="activity" data-timer="start-type" data-type="${esc(n)}"><i class="dot" style="background:${c}"></i>${esc(n)}</button>`).join('')}</div></div>`:'';
+  box.innerHTML=list.map(t=>timerCard(t,list.length>1)).join('')+(free.length?`<button class="timer-add${pickingTimer?' open':''}" data-timer="pick" aria-expanded="${pickingTimer}"><span class="plus" aria-hidden="true">${pickingTimer?'×':'+'}</span><span>${pickingTimer?'Отмена':'Ещё таймер'}</span></button>`+picker:'');
   bar.innerHTML=list.map(t=>{const now=Date.now(),running=TimerLogic.isRunning(t),check=TimerLogic.needsCheck(t,now);return `<div class="bar-row${running?'':' paused'}" data-timer-id="${esc(t.id)}"><div class="timer-info"><div class="timer-name"><i class="dot" style="background:${color(t.type)}"></i>${esc(t.type)}${running?check?' · ещё занимаетесь?':'':' · пауза'}</div><div class="timer-clock" data-clock="${esc(t.id)}">${fmtClock(TimerLogic.totals(t,now).activeMs)}</div></div><div class="timer-buttons">${timerButtons(running,true)}</div></div>`}).join('');
   document.body.style.setProperty('--bar-rows',list.length);
  }
  updateTimerBar();
 }
 // The bar shows only while a timer runs and the timer block is off screen.
-let timerBoxOnScreen=true;
+let timerBoxOnScreen=true,pickingTimer=false;
 function updateTimerBar(){const show=activeTimers().length>0&&!timerBoxOnScreen;$('#timerBar').classList.toggle('show',show);document.body.classList.toggle('timer-bar-on',show)}
 if('IntersectionObserver' in window)new IntersectionObserver(([entry])=>{timerBoxOnScreen=entry.isIntersecting;updateTimerBar()}).observe($('#liveTimer'));
 // The stop dialog works on one timer at a time.
@@ -743,6 +750,12 @@ $('#liveTimer').onclick=$('#timerBar').onclick=e=>{
   if(!selected)return;
   if(activeTimers().some(x=>x.type===selected)){toast(`Таймер «${selected}» уже идёт`);return}
   const newId=crypto.randomUUID();changeTimer(newId,{type:selected,segments:[{start:now,end:null}]});
+ }
+ else if(action==='pick'){pickingTimer=!pickingTimer;renderTimer()}
+ else if(action==='start-type'){
+  const type=button.dataset.type;pickingTimer=false;
+  if(!TYPES.some(([n])=>n===type)||activeTimers().some(x=>x.type===type)){renderTimer();return}
+  changeTimer(crypto.randomUUID(),{type,segments:[{start:now,end:null}]});
  }
  else if(action==='pause'&&t&&TimerLogic.isRunning(t))changeTimer(t.id,{...t,segments:t.segments.map((s,i)=>i===t.segments.length-1?{...s,end:now}:s)});
  else if(action==='resume'&&t&&!TimerLogic.isRunning(t))changeTimer(t.id,{...t,segments:[...t.segments,{start:now,end:null}]});
