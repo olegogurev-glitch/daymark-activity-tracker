@@ -76,7 +76,8 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .activity.selected{background:var(--night);border-color:var(--night);color:#fff}
 
 /* Timer: the one dark, confident block on the page */
-.live-timer{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px 22px;margin-bottom:6px;border-radius:18px;background:linear-gradient(135deg,var(--night),var(--night-2));color:#fff}
+.timers{display:grid;gap:8px;margin-bottom:6px}
+.live-timer{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px 22px;border-radius:18px;background:linear-gradient(135deg,var(--night),var(--night-2));color:#fff}
 .timer-info{min-width:0}
 .timer-label{font-size:13px;color:#c8c1dd}
 .timer-name{display:flex;align-items:center;min-width:0;font-weight:500;font-size:15px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -84,21 +85,34 @@ button:disabled{cursor:not-allowed;opacity:.5}
 .timer-clock{font:500 44px/1.1 var(--sans);letter-spacing:-1px;font-variant-numeric:tabular-nums;color:#fff;margin:3px 0 2px}
 .timer-state{font-size:13px;color:#c8c1dd}
 .live-timer.paused .timer-clock{color:#e4b9cd}
+/* Two or more timers: smaller cards, icon buttons */
+.live-timer.compact{flex-wrap:nowrap;padding:14px 16px 14px 20px}
+.live-timer.compact .timer-clock{font-size:30px;letter-spacing:-.5px;margin:1px 0}
+.live-timer.compact .timer-info{flex:1}
+.live-timer.compact .timer-state{font-size:12px}
+.live-timer.compact .timer-buttons{flex-wrap:nowrap;flex:none}
+.live-timer.compact .btn{min-width:46px;padding:10px 12px}
+.timer-add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:46px;padding:10px 14px;border:1.5px dashed var(--line-strong);border-radius:14px;background:transparent;color:var(--ink-2);font-size:14px;text-align:center}
+.timer-add:not(:disabled):hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.timer-add b{font-weight:600;color:var(--ink)}
+.timer-add .plus{font-size:20px;line-height:1;font-weight:500}
 .timer-buttons{display:flex;gap:8px;flex-wrap:wrap}
 .live-timer .btn,.timer-bar .btn{border-color:#ffffff38;background:#ffffff14;color:#fff;min-height:46px;padding:10px 18px}
 .live-timer .btn:hover,.timer-bar .btn:hover{background:#ffffff26;border-color:#ffffff60}
 .live-timer .btn.primary,.timer-bar .btn.primary{background:#fff;border-color:#fff;color:var(--night)}
 .live-timer .btn.primary:hover,.timer-bar .btn.primary:hover{background:#ece8f6;border-color:#ece8f6}
-.timer-bar{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:15;width:min(560px,calc(100% - 24px));padding:9px 10px 9px 18px;border-radius:18px;background:linear-gradient(135deg,var(--night),var(--night-2));color:#fff;box-shadow:0 14px 36px #2a244055;align-items:center;justify-content:space-between;gap:10px}
+.timer-bar{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:15;width:min(560px,calc(100% - 24px));padding:9px 10px 9px 18px;border-radius:18px;background:linear-gradient(135deg,var(--night),var(--night-2));color:#fff;box-shadow:0 14px 36px #2a244055;flex-direction:column;gap:6px}
 .timer-bar.show{display:flex}
+.bar-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bar-row+.bar-row{padding-top:6px;border-top:1px solid #ffffff1f}
 .timer-bar .timer-info{flex:1}
 .timer-bar .timer-name{font-size:13px;color:#d8d2e8}
 .timer-bar .timer-clock{font-size:20px;letter-spacing:-.3px;margin:0}
-.timer-bar.paused .timer-clock{color:#e4b9cd}
+.bar-row.paused .timer-clock{color:#e4b9cd}
 .timer-bar .timer-buttons{flex-wrap:nowrap;flex-shrink:0}
 .timer-bar .btn{min-width:46px;min-height:44px;padding:8px 12px}
-body.timer-bar-on .shell{padding-bottom:104px}
-body.timer-bar-on .toast{bottom:92px}
+body.timer-bar-on .shell{padding-bottom:calc(40px + 64px*var(--bar-rows,1))}
+body.timer-bar-on .toast{bottom:calc(28px + 64px*var(--bar-rows,1))}
 
 /* Manual entry */
 .manual-entry>summary{display:flex;align-items:center;gap:7px;cursor:pointer;list-style:none;font-size:14px;font-weight:500;color:var(--ink-2);padding:12px 0 2px;width:max-content;max-width:100%}
@@ -278,6 +292,14 @@ body.timer-bar-on .toast{bottom:92px}
 .goal-info{flex:1;min-width:0}
 .goal-name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .goal-hours{font-size:13px;color:var(--ink-3)}
+.goal-item.has-status{margin-left:-10px;margin-right:-10px;padding:8px 10px;border-radius:16px}
+.goal-item.done,.goal-item.on-track{background:var(--teal-soft)}
+.goal-item.at-risk{background:var(--rose-soft)}
+.goal-status{margin-top:1px;font-size:13px;font-weight:500;line-height:1.3}
+.goal-item.done .goal-status,.goal-item.on-track .goal-status{color:var(--teal)}
+.goal-item.at-risk .goal-status{color:var(--rose)}
+.goal-item.has-status .goal-ring::before{background:var(--goal-bg,var(--surface))}
+.goal-item.done{--goal-bg:var(--teal-soft)}.goal-item.on-track{--goal-bg:var(--teal-soft)}.goal-item.at-risk{--goal-bg:var(--rose-soft)}
 .goal-item .del{flex:none;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;margin-right:-8px;border:0;border-radius:10px;background:transparent;color:var(--ink-3)}
 .goal-item .del:hover{background:var(--rose-soft);color:var(--rose)}
 
@@ -366,8 +388,11 @@ body.timer-bar-on .toast{bottom:92px}
  .live-timer{padding:16px}
  .live-timer:not(.active):not(.paused){flex-wrap:nowrap}
  .live-timer:not(.active):not(.paused) .timer-name{font-size:20px;white-space:normal}
- .live-timer.active .timer-buttons,.live-timer.paused .timer-buttons{width:100%}
- .live-timer.active .btn,.live-timer.paused .btn{flex:1}
+ .live-timer.active:not(.compact) .timer-buttons,.live-timer.paused:not(.compact) .timer-buttons{width:100%}
+ .live-timer.active:not(.compact) .btn,.live-timer.paused:not(.compact) .btn{flex:1}
+ .live-timer.compact{padding:12px 12px 12px 16px;gap:10px}
+ .live-timer.compact .timer-clock{font-size:28px}
+ .live-timer.compact .btn{min-width:44px;padding:8px 10px}
  .timer-clock{font-size:40px}
  .timer-bar .timer-clock{font-size:20px}
  .manual-fields{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -413,7 +438,7 @@ body.timer-bar-on .toast{bottom:92px}
 <div class="hero"><div><div class="eyebrow" id="dailyPhrase">Маленькие шаги — тоже дела!</div><h1 id="greeting">Чем сегодня займёмся?</h1></div><div class="date-nav"><button class="iconbtn" id="prevDay" aria-label="Предыдущий день"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button><div class="date-display" id="dateDisplay"></div><button class="iconbtn" id="nextDay" aria-label="Следующий день"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button><button class="btn" id="todayBtn">Сегодня</button></div></div>
 <div class="layout"><main>
 <section class="card entry"><div class="edit-banner" id="editBanner">Редактирование занятия <button type="button" id="cancelEdit">Отменить</button></div><h2 class="cardtitle" id="entryTitle">Добавить занятие</h2><div class="activity-grid" id="activityGrid"></div>
-<div class="live-timer" id="liveTimer"></div><details class="manual-entry" id="manualEntry"><summary><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg>Указать время вручную</summary><div class="manual-fields"><div class="field"><label for="start">Начало</label><input class="input" type="time" id="start" value="09:00"></div><div class="field"><label for="end">Конец</label><input class="input" type="time" id="end" value="10:00"></div><div class="field note-field"><label for="note">Заметка <span>(необязательно)</span></label><input class="input" id="note" placeholder="Что-нибудь запомнить"></div></div>
+<div class="timers" id="liveTimer"></div><details class="manual-entry" id="manualEntry"><summary><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg>Указать время вручную</summary><div class="manual-fields"><div class="field"><label for="start">Начало</label><input class="input" type="time" id="start" value="09:00"></div><div class="field"><label for="end">Конец</label><input class="input" type="time" id="end" value="10:00"></div><div class="field note-field"><label for="note">Заметка <span>(необязательно)</span></label><input class="input" id="note" placeholder="Что-нибудь запомнить"></div></div>
 <div class="overlap-warning" id="overlapWarning"></div><div class="entryactions"><div class="duration">Длительность<strong id="duration">1 ч</strong></div><button class="btn primary" id="addBtn">Добавить</button></div></details></section>
 <section class="card highlight-card"><div class="highlight-icon"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></div><div class="highlight-body"><div class="highlight-label">Итог дня</div><p id="daySummary" aria-live="polite"></p></div></section>
 <section class="card day-card"><div class="card-head"><div><h2 class="cardtitle">Мой день</h2><div class="sub" id="daySub">Занятия за день</div></div><span class="count" id="entryCount">0 записей</span></div><div class="entries" id="entries"></div></section>
@@ -457,7 +482,9 @@ body.timer-bar-on .toast{bottom:92px}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script><script src="sync-merge.js"></script><script src="timer-logic.js"></script><script src="day-summary.js"></script><script src="backup-reminder.js"></script><script src="stats.js"></script><script>
 function readJSON(key,fallback){try{let value=JSON.parse(localStorage.getItem(key));return value===null||value===undefined?fallback:value}catch(_){return fallback}}
 const TYPES=readJSON('daymark-types-v1',null)||[['работа','#ed7771'],['психология','#95c99a'],['медитация','#efc75e'],['ходьба','#bc8ad5'],['аудиокнига','#95c99a'],['упражнения','#bc8ad5'],['рисование','#74b9d8'],['изучение языка','#efc75e'],['чтение','#95c99a'],['скакалка','#bc8ad5'],['вязание','#95c99a'],['танцы','#bc8ad5']];const HIDDEN=new Set(readJSON('daymark-hidden-types-v1',[]));
-const KEY='daymark-activities-v1', GOAL_KEY='daymark-weekly-goals-v1', DELETED_KEY='daymark-deleted-activities-v1', DELETED_TYPES_KEY='daymark-deleted-types-v1', DELETED_GOALS_KEY='daymark-deleted-goals-v1', GOAL_CHANGES_KEY='daymark-goal-changes-v1', TYPE_CHANGES_KEY='daymark-type-changes-v1', TYPE_ORDER_KEY='daymark-type-order-v1', TIMER_KEY='daymark-timer-v1', HIGHLIGHTS_KEY='daymark-highlights-v1', TYPE_COLORS=['#ed9b75','#86b9dc','#b890d2','#91bf86','#e8bf60','#e27d84'];let data=readJSON(KEY,[]),deletedIds=new Set(readJSON(DELETED_KEY,[])),deletedTypes=new Set(readJSON(DELETED_TYPES_KEY,[])),deletedGoals=new Set(readJSON(DELETED_GOALS_KEY,[])),goalChanges=readJSON(GOAL_CHANGES_KEY,{}),goals=readJSON(GOAL_KEY,{}),typeChanges=readJSON(TYPE_CHANGES_KEY,{}),typeOrder=readJSON(TYPE_ORDER_KEY,null),timer=readJSON(TIMER_KEY,null),highlights=readJSON(HIGHLIGHTS_KEY,{}),selected=TYPES[0]?.[0]||'',date=new Date(),calDate=new Date(),period='week',summaryActivity=null;date.setHours(0,0,0,0);calDate.setDate(1);
+const KEY='daymark-activities-v1', GOAL_KEY='daymark-weekly-goals-v1', DELETED_KEY='daymark-deleted-activities-v1', DELETED_TYPES_KEY='daymark-deleted-types-v1', DELETED_GOALS_KEY='daymark-deleted-goals-v1', GOAL_CHANGES_KEY='daymark-goal-changes-v1', TYPE_CHANGES_KEY='daymark-type-changes-v1', TYPE_ORDER_KEY='daymark-type-order-v1', TIMER_KEY='daymark-timer-v1', TIMERS_KEY='daymark-timers-v1', HIGHLIGHTS_KEY='daymark-highlights-v1', TYPE_COLORS=['#ed9b75','#86b9dc','#b890d2','#91bf86','#e8bf60','#e27d84'];let data=readJSON(KEY,[]),deletedIds=new Set(readJSON(DELETED_KEY,[])),deletedTypes=new Set(readJSON(DELETED_TYPES_KEY,[])),deletedGoals=new Set(readJSON(DELETED_GOALS_KEY,[])),goalChanges=readJSON(GOAL_CHANGES_KEY,{}),goals=readJSON(GOAL_KEY,{}),typeChanges=readJSON(TYPE_CHANGES_KEY,{}),typeOrder=readJSON(TYPE_ORDER_KEY,null),timers=readTimers(),highlights=readJSON(HIGHLIGHTS_KEY,{}),selected=TYPES[0]?.[0]||'',date=new Date(),calDate=new Date(),period='week',summaryActivity=null;date.setHours(0,0,0,0);calDate.setDate(1);
+// Several timers can run at once, keyed by id. Before that there was a single timer: bring it along.
+function readTimers(){let saved=readJSON(TIMERS_KEY,null);if(saved&&typeof saved==='object')return saved;let old=readJSON(TIMER_KEY,null);return old&&!old.stopped&&old.id?{[old.id]:old}:{}}
 // Each change gets a stamp newer than the one it replaces, even if this device's clock runs behind.
 function nextStamp(previous){return Math.max(Date.now(),(Number(previous)||0)+1)}
 function stampType(name,extra){typeChanges[name]={updatedAt:nextStamp(typeChanges[name]?.updatedAt),deleted:false,color:color(name),hidden:HIDDEN.has(name),...extra}}
@@ -474,7 +501,7 @@ const CHIP_ORDER_KEY='daymark-chip-order-v1';
 let chipsByUse=readJSON(CHIP_ORDER_KEY,'use')!=='manual',chipRank=null,selectionTouched=false;
 function refreshChipOrder(){chipRank=new Map(StatsLogic.orderByUse(TYPES.map(([n])=>n),data,iso(new Date())).map((n,i)=>[n,i]))}
 function orderedChips(list){if(!chipsByUse||!chipRank)return list;return list.map((t,i)=>({t,i,r:chipRank.has(t[0])?chipRank.get(t[0]):1e6+i})).sort((a,b)=>a.r-b.r).map(x=>x.t)}
-function preselectLastUsed(){if(selectionTouched||editingId||activeTimer())return;const last=StatsLogic.lastUsed(TYPES.filter(([n])=>!HIDDEN.has(n)).map(([n])=>n),data);if(last)selected=last}
+function preselectLastUsed(){if(selectionTouched||editingId||activeTimers().length)return;const last=StatsLogic.lastUsed(TYPES.filter(([n])=>!HIDDEN.has(n)).map(([n])=>n),data);if(last)selected=last}
 function renderTypes(){if(!editingId&&!TYPES.some(([n])=>n===selected))selected=TYPES.find(([n])=>!HIDDEN.has(n))?.[0]||TYPES[0]?.[0]||'';let active=TYPES.filter(([n])=>!HIDDEN.has(n)||n===selected),goalChoice=$('#goalType').value,patternChoice=$('#patternType').value;$('#goalType').innerHTML=TYPES.map(([n])=>`<option value="${esc(n)}">${esc(n)}${HIDDEN.has(n)?' · скрыто':''}</option>`).join('');$('#patternType').innerHTML=TYPES.map(([n])=>`<option value="${esc(n)}">${esc(n)}${HIDDEN.has(n)?' · скрыто':''}</option>`).join('');if(TYPES.some(([n])=>n===goalChoice))$('#goalType').value=goalChoice;else if(TYPES.some(([n])=>n===selected))$('#goalType').value=selected;if(TYPES.some(([n])=>n===patternChoice))$('#patternType').value=patternChoice;else if(TYPES.some(([n])=>n===selected))$('#patternType').value=selected;$('#activityGrid').innerHTML=orderedChips(active).map(([name,c])=>`<button class="activity ${selected===name?'selected':''}" aria-pressed="${selected===name}" data-type="${esc(name)}"><i class="dot" style="background:${c}"></i>${esc(name)}</button>`).join('');document.querySelectorAll('.activity').forEach(b=>b.onclick=()=>{selected=b.dataset.type;selectionTouched=true;renderTypes()});renderTypeList();renderTimer()}
 function renderTypeList(){$('#typeList').innerHTML=TYPES.map(([name,c],i)=>`<div class="type-item ${HIDDEN.has(name)?'hidden-type':''}"><input class="type-color" type="color" value="${/^#[0-9a-f]{6}$/i.test(c)?c:'#95c99a'}" data-color="${i}" title="Изменить цвет: ${esc(name)}" aria-label="Цвет занятия ${esc(name)}"><span class="type-name">${esc(name)}${HIDDEN.has(name)?' · скрыто':''}</span><button data-move="up" data-index="${i}" title="Выше" aria-label="Выше: ${esc(name)}">${ic('up')}</button><button data-move="down" data-index="${i}" title="Ниже" aria-label="Ниже: ${esc(name)}">${ic('down')}</button><button data-rename="${i}" title="Переименовать" aria-label="Переименовать ${esc(name)}">${ic('edit')}</button><button data-hide="${i}" title="${HIDDEN.has(name)?'Показать':'Скрыть'}" aria-label="${HIDDEN.has(name)?'Показать':'Скрыть'} ${esc(name)}">${ic(HIDDEN.has(name)?'eye-off':'eye')}</button><button class="type-delete" data-delete="${i}" title="Удалить занятие" aria-label="Удалить занятие ${esc(name)}">${ic('close')}</button></div>`).join('')}
 // The app's own question box. Resolves true/false, or with `input`, the text or null.
@@ -504,7 +531,7 @@ function askDialog({title,text='',confirm:confirmLabel,cancel='Отмена',dan
 }
 function storeTypes(){localStorage.setItem('daymark-types-v1',JSON.stringify(TYPES));localStorage.setItem('daymark-hidden-types-v1',JSON.stringify([...HIDDEN]));localStorage.setItem(DELETED_TYPES_KEY,JSON.stringify([...deletedTypes]));localStorage.setItem(TYPE_CHANGES_KEY,JSON.stringify(typeChanges));localStorage.setItem(TYPE_ORDER_KEY,JSON.stringify(typeOrder))}
 function persistTypes(){storeTypes();renderTypes();renderSummary();renderExtras();scheduleSync()}
-$('#addType').onclick=()=>{let field=$('#newType'),name=field.value.trim();if(!name)return;if(TYPES.some(([n])=>n.toLocaleLowerCase()===name.toLocaleLowerCase())){toast('Такое занятие уже есть');return}deletedTypes.delete(name);TYPES.push([name,TYPE_COLORS[TYPES.length%TYPE_COLORS.length]]);stampType(name);field.value='';persistTypes();toast('Занятие добавлено')};$('#newType').onkeydown=e=>{if(e.key==='Enter')$('#addType').click()};$('#typeList').oninput=e=>{let input=e.target.closest('[data-color]');if(!input)return;let i=Number(input.dataset.color);if(!TYPES[i])return;TYPES[i][1]=input.value;localStorage.setItem('daymark-types-v1',JSON.stringify(TYPES));let row=input.closest('.type-item');row?.querySelector('.dot')?.style.setProperty('background',input.value);document.querySelectorAll('.activity-grid .activity').forEach(b=>{if(b.dataset.type===TYPES[i][0])b.querySelector('.dot').style.background=input.value})};$('#typeList').onchange=e=>{if(!e.target.matches('[data-color]'))return;let type=TYPES[Number(e.target.dataset.color)];if(type)stampType(type[0]);persistTypes()};$('#typeList').onclick=async e=>{let b=e.target.closest('button');if(!b)return;if(b.dataset.delete!==undefined){let i=Number(b.dataset.delete),name=TYPES[i]?.[0];if(!name)return;if(activeTimer()?.type===name){toast('Сначала завершите это занятие в таймере');return}let used=data.filter(x=>x.type===name).length;if(!await askDialog({title:`Удалить занятие «${name}»?`,text:used?`Вместе с ним ${plural(used,'удалится','удалятся','удалятся')} ${used} ${plural(used,'запись','записи','записей')}. Отменить это будет нельзя.`:'Записей с этим занятием нет.',confirm:'Удалить',danger:true}))return;i=TYPES.findIndex(([n])=>n===name);if(i<0)return;data.forEach(x=>{if(x.type===name)deletedIds.add(x.id)});data=data.filter(x=>x.type!==name);delete goals[name];deletedGoals.add(name);goalChanges[name]={updatedAt:nextStamp(goalChanges[name]?.updatedAt),deleted:true};HIDDEN.delete(name);deletedTypes.add(name);TYPES.splice(i,1);typeChanges[name]={updatedAt:nextStamp(typeChanges[name]?.updatedAt),deleted:true};if(selected===name)selected=TYPES.find(([n])=>!HIDDEN.has(n))?.[0]||TYPES[0]?.[0]||'';if(summaryActivity===name)summaryActivity=null;persistGoals();save();persistTypes();render();toast('Занятие удалено');return}let i=Number(b.dataset.index);if(b.dataset.rename!==undefined){i=Number(b.dataset.rename);let old=TYPES[i][0],name=await askDialog({title:'Переименовать занятие',confirm:'Сохранить',input:{label:'Новое название',value:old}});if(!name||name===old)return;i=TYPES.findIndex(([n])=>n===old);if(i<0)return;if(TYPES.some(([n],j)=>j!==i&&n.toLocaleLowerCase()===name.toLocaleLowerCase())){toast('Такое занятие уже есть');return}TYPES[i][0]=name;deletedTypes.add(old);deletedTypes.delete(name);data.forEach(x=>{if(x.type===old){x.type=name;x.updatedAt=nextStamp(x.updatedAt)}});if(goals[old]!==undefined){let target=goals[old],stamp=Date.now();goals[name]=target;delete goals[old];deletedGoals.add(old);deletedGoals.delete(name);goalChanges[old]={updatedAt:stamp,deleted:true};goalChanges[name]={updatedAt:stamp+1,target,deleted:false};persistGoals()}if(HIDDEN.has(old)){HIDDEN.delete(old);HIDDEN.add(name)}if(selected===old)selected=name;if(summaryActivity===old)summaryActivity=name;if(activeTimer()?.type===old){timer.type=name;timer.updatedAt=nextStamp(timer.updatedAt);storeTimer()}let renamedAt=nextStamp(Math.max(typeChanges[old]?.updatedAt||0,typeChanges[name]?.updatedAt||0));typeChanges[old]={updatedAt:renamedAt,deleted:true,renamedTo:name};stampType(name,{updatedAt:renamedAt});stampOrder();persistTypes();save()}else if(b.dataset.hide!==undefined){i=Number(b.dataset.hide);let name=TYPES[i][0];if(HIDDEN.has(name))HIDDEN.delete(name);else{HIDDEN.add(name);if(selected===name){let next=TYPES.find(([n])=>!HIDDEN.has(n));if(next)selected=next[0]}}stampType(name);persistTypes()}else if(b.dataset.move){let j=b.dataset.move==='up'?i-1:i+1;if(j<0||j>=TYPES.length)return;[TYPES[i],TYPES[j]]=[TYPES[j],TYPES[i]];stampOrder();persistTypes()}};
+$('#addType').onclick=()=>{let field=$('#newType'),name=field.value.trim();if(!name)return;if(TYPES.some(([n])=>n.toLocaleLowerCase()===name.toLocaleLowerCase())){toast('Такое занятие уже есть');return}deletedTypes.delete(name);TYPES.push([name,TYPE_COLORS[TYPES.length%TYPE_COLORS.length]]);stampType(name);field.value='';persistTypes();toast('Занятие добавлено')};$('#newType').onkeydown=e=>{if(e.key==='Enter')$('#addType').click()};$('#typeList').oninput=e=>{let input=e.target.closest('[data-color]');if(!input)return;let i=Number(input.dataset.color);if(!TYPES[i])return;TYPES[i][1]=input.value;localStorage.setItem('daymark-types-v1',JSON.stringify(TYPES));let row=input.closest('.type-item');row?.querySelector('.dot')?.style.setProperty('background',input.value);document.querySelectorAll('.activity-grid .activity').forEach(b=>{if(b.dataset.type===TYPES[i][0])b.querySelector('.dot').style.background=input.value})};$('#typeList').onchange=e=>{if(!e.target.matches('[data-color]'))return;let type=TYPES[Number(e.target.dataset.color)];if(type)stampType(type[0]);persistTypes()};$('#typeList').onclick=async e=>{let b=e.target.closest('button');if(!b)return;if(b.dataset.delete!==undefined){let i=Number(b.dataset.delete),name=TYPES[i]?.[0];if(!name)return;if(activeTimers().some(t=>t.type===name)){toast('Сначала завершите это занятие в таймере');return}let used=data.filter(x=>x.type===name).length;if(!await askDialog({title:`Удалить занятие «${name}»?`,text:used?`Вместе с ним ${plural(used,'удалится','удалятся','удалятся')} ${used} ${plural(used,'запись','записи','записей')}. Отменить это будет нельзя.`:'Записей с этим занятием нет.',confirm:'Удалить',danger:true}))return;i=TYPES.findIndex(([n])=>n===name);if(i<0)return;data.forEach(x=>{if(x.type===name)deletedIds.add(x.id)});data=data.filter(x=>x.type!==name);delete goals[name];deletedGoals.add(name);goalChanges[name]={updatedAt:nextStamp(goalChanges[name]?.updatedAt),deleted:true};HIDDEN.delete(name);deletedTypes.add(name);TYPES.splice(i,1);typeChanges[name]={updatedAt:nextStamp(typeChanges[name]?.updatedAt),deleted:true};if(selected===name)selected=TYPES.find(([n])=>!HIDDEN.has(n))?.[0]||TYPES[0]?.[0]||'';if(summaryActivity===name)summaryActivity=null;persistGoals();save();persistTypes();render();toast('Занятие удалено');return}let i=Number(b.dataset.index);if(b.dataset.rename!==undefined){i=Number(b.dataset.rename);let old=TYPES[i][0],name=await askDialog({title:'Переименовать занятие',confirm:'Сохранить',input:{label:'Новое название',value:old}});if(!name||name===old)return;i=TYPES.findIndex(([n])=>n===old);if(i<0)return;if(TYPES.some(([n],j)=>j!==i&&n.toLocaleLowerCase()===name.toLocaleLowerCase())){toast('Такое занятие уже есть');return}TYPES[i][0]=name;deletedTypes.add(old);deletedTypes.delete(name);data.forEach(x=>{if(x.type===old){x.type=name;x.updatedAt=nextStamp(x.updatedAt)}});if(goals[old]!==undefined){let target=goals[old],stamp=Date.now();goals[name]=target;delete goals[old];deletedGoals.add(old);deletedGoals.delete(name);goalChanges[old]={updatedAt:stamp,deleted:true};goalChanges[name]={updatedAt:stamp+1,target,deleted:false};persistGoals()}if(HIDDEN.has(old)){HIDDEN.delete(old);HIDDEN.add(name)}if(selected===old)selected=name;if(summaryActivity===old)summaryActivity=name;for(const t of activeTimers())if(t.type===old)timers[t.id]={...t,type:name,updatedAt:nextStamp(t.updatedAt)};storeTimers();let renamedAt=nextStamp(Math.max(typeChanges[old]?.updatedAt||0,typeChanges[name]?.updatedAt||0));typeChanges[old]={updatedAt:renamedAt,deleted:true,renamedTo:name};stampType(name,{updatedAt:renamedAt});stampOrder();persistTypes();save()}else if(b.dataset.hide!==undefined){i=Number(b.dataset.hide);let name=TYPES[i][0];if(HIDDEN.has(name))HIDDEN.delete(name);else{HIDDEN.add(name);if(selected===name){let next=TYPES.find(([n])=>!HIDDEN.has(n));if(next)selected=next[0]}}stampType(name);persistTypes()}else if(b.dataset.move){let j=b.dataset.move==='up'?i-1:i+1;if(j<0||j>=TYPES.length)return;[TYPES[i],TYPES[j]]=[TYPES[j],TYPES[i]];stampOrder();persistTypes()}};
 
 function render(){let key=iso(date), today=iso(new Date());$('#dateDisplay').textContent=fmtDate(date,{weekday:'short',month:'short',day:'numeric',year:'numeric'});$('#greeting').textContent=key===today?'Чем сегодня займёмся?':fmtDate(date,{weekday:'long',month:'long',day:'numeric'});$('#daySub').textContent=fmtDate(date,{weekday:'long',month:'long',day:'numeric'});let list=data.filter(x=>x.date===key).sort((a,b)=>a.start.localeCompare(b.start));$('#entryCount').textContent=list.length?`${list.length} ${plural(list.length,'запись','записи','записей')} · ${hm(list.reduce((sum,x)=>sum+x.minutes,0))}`:'';$('#todayBtn').hidden=key===today;$('#entries').innerHTML=list.length?list.map(x=>`<div class="item"><div class="item-time">${esc(x.start)}<span>${esc(x.end)}</span></div><div class="item-bar" style="background:${color(x.type)}"></div><div class="item-body"><div class="itemname">${esc(x.type)}</div>${x.note||x.pausedMinutes>0?`<div class="itemmeta" title="${esc(x.note||'')}">${[x.note?esc(x.note):'',x.pausedMinutes>0?`пауза ${hm(x.pausedMinutes)}`:''].filter(Boolean).join(' · ')}</div>`:''}</div><span class="itemduration">${hm(x.minutes)}</span><span class="itemtools"><button class="edit-entry" data-edit="${x.id}" aria-label="Изменить занятие" title="Изменить">${ic('edit')}</button><button class="del" data-id="${x.id}" aria-label="Удалить занятие" title="Удалить">${ic('close')}</button></span></div>`).join(''):'<div class="empty">День только начинается! Добавьте первое занятие выше.</div>';document.querySelectorAll('#entries .del').forEach(b=>b.onclick=()=>deleteEntry(b.dataset.id));document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>beginEdit(b.dataset.edit));renderSummary();renderExtras();updateOverlapWarning()}
 // A deleted id can never come back through sync, so undo restores a copy under a new id.
@@ -606,6 +633,18 @@ function renderSummary(){
 }
 function storeGoals(){localStorage.setItem(GOAL_KEY,JSON.stringify(goals));localStorage.setItem(DELETED_GOALS_KEY,JSON.stringify([...deletedGoals]));localStorage.setItem(GOAL_CHANGES_KEY,JSON.stringify(goalChanges))}function persistGoals(){storeGoals();scheduleSync()}
 
+// From Friday, a goal for this week says whether it's on time or about to be missed.
+// Reached goals say so any day. Uses stats.js; an older copy of it simply shows no line.
+function goalStatusText(targetMinutes,minutes,weekFrom){
+ if(!StatsLogic.goalStatus)return null;
+ const hm=n=>window.hm(n).replace(/ /g,'\u00a0');
+ const st=StatsLogic.goalStatus({targetMinutes,minutes,weekFrom,today:iso(new Date())});
+ const when=st.daysLeft===1?'сегодня':`за ${st.daysLeft} ${plural(st.daysLeft,'день','дня','дней')}`;
+ if(st.state==='done')return {state:'done',text:'Цель выполнена!'};
+ if(st.state==='on-track')return {state:'on-track',text:`Успеваете: осталось ${hm(st.remaining)} ${when}`};
+ if(st.state==='at-risk')return {state:'at-risk',text:`Можно не успеть: нужно ещё ${hm(st.remaining)} ${when}`};
+ return null;
+}
 function renderExtras(){
  renderDaySummary();renderBackupNote();
  const monthStart=new Date(calDate.getFullYear(),calDate.getMonth(),1), offset=(monthStart.getDay()+6)%7, daysIn=new Date(calDate.getFullYear(),calDate.getMonth()+1,0).getDate(), prevCount=new Date(calDate.getFullYear(),calDate.getMonth(),0).getDate();
@@ -614,58 +653,69 @@ function renderExtras(){
  for(let i=0;i<42;i++){let dnum=i-offset+1, d=new Date(calDate.getFullYear(),calDate.getMonth(),dnum), key=iso(d), inMonth=dnum>=1&&dnum<=daysIn, val=sums[key]||0, level=val?Math.min(3,Math.ceil(val/max*3)):0;cells+=`<button class="calday ${inMonth?'':'muted'} ${val?'has level'+level:''} ${key===iso(date)?'selected':''} ${key===iso(new Date())?'today':''}" data-date="${key}" title="${val?hm(val)+' активности':'Нет записей'}">${d.getDate()}</button>`}
  $('#calendar').innerHTML=cells;document.querySelectorAll('.calday').forEach(b=>b.onclick=()=>{date=parse(b.dataset.date);render()});
  const weekStart=new Date(date);weekStart.setDate(date.getDate()-(date.getDay()+6)%7);const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);let weekEntries=data.filter(x=>{let d=parse(x.date);return d>=weekStart&&d<=weekEnd});
- $('#goals').innerHTML=Object.keys(goals).length?Object.entries(goals).map(([t,target])=>{let got=weekEntries.filter(x=>x.type===t).reduce((a,x)=>a+x.minutes,0), pct=Math.min(100,got/(target*60)*100);return `<div class="goal-item"><div class="goal-ring" style="--p:${pct};--goal-color:${color(t)}"><span>${Math.round(pct)}%</span></div><div class="goal-info"><div class="goal-name">${esc(t)}</div><div class="goal-hours">${fmtHours(got/60)} из ${fmtHours(target)} ч</div></div><button class="del" data-goal="${esc(t)}" aria-label="Удалить цель: ${esc(t)}" title="Удалить цель">${ic('close')}</button></div>`}).join(''):'<div class="goal-empty">Добавьте цель — например, 3 часа рисования в неделю.</div>';
+ $('#goals').innerHTML=Object.keys(goals).length?Object.entries(goals).map(([t,target])=>{let got=weekEntries.filter(x=>x.type===t).reduce((a,x)=>a+x.minutes,0), pct=Math.min(100,got/(target*60)*100), status=goalStatusText(target*60,got,iso(weekStart));return `<div class="goal-item${status?` has-status ${status.state}`:''}"><div class="goal-ring" style="--p:${pct};--goal-color:${color(t)}"><span>${Math.round(pct)}%</span></div><div class="goal-info"><div class="goal-name">${esc(t)}</div><div class="goal-hours">${fmtHours(got/60)} из ${fmtHours(target)} ч</div>${status?`<div class="goal-status">${status.text}</div>`:''}</div><button class="del" data-goal="${esc(t)}" aria-label="Удалить цель: ${esc(t)}" title="Удалить цель">${ic('close')}</button></div>`}).join(''):'<div class="goal-empty">Добавьте цель — например, 3 часа рисования в неделю.</div>';
  document.querySelectorAll('[data-goal]').forEach(b=>b.onclick=()=>{let name=b.dataset.goal;delete goals[name];deletedGoals.add(name);goalChanges[name]={updatedAt:Date.now(),deleted:true};persistGoals();renderExtras();toast('Цель удалена')});
  const pt=$('#patternType').value||TYPES[0]?.[0]||'',byday=Array(7).fill(0);data.filter(x=>x.type===pt).forEach(x=>byday[(parse(x.date).getDay()+6)%7]+=x.minutes);let peak=Math.max(...byday),count=byday.filter(v=>v===peak&&v>0).length;$('#patternDays').innerHTML=byday.map((v,i)=>`<div class="pattern-day ${v&&v===peak?'active':''}" style="--activity-color:${color(pt)}">${['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][i]}<b>${v?fmtHours(v/60)+'ч':'·'}</b></div>`).join('');$('#patternCopy').innerHTML=peak?`Чаще всего вы занимаетесь этим по <strong>${joinRu(byday.map((v,i)=>v===peak&&v>0?['понедельникам','вторникам','средам','четвергам','пятницам','субботам','воскресеньям'][i]:null).filter(Boolean))}</strong>.`:'Добавьте несколько занятий, и здесь появятся ваши любимые дни.';
 }
 $('#calPrev').onclick=()=>{calDate.setMonth(calDate.getMonth()-1);renderExtras()};$('#calNext').onclick=()=>{calDate.setMonth(calDate.getMonth()+1);renderExtras()};$('#patternType').onchange=renderExtras;$('#saveGoal').onclick=()=>{let t=$('#goalType').value,h=parseFloat($('#goalHours').value);if(!t){toast('Сначала добавьте занятие в список');return}if(!h||h<=0){toast('Укажите цель в часах');return}goals[t]=h;deletedGoals.delete(t);goalChanges[t]={updatedAt:Date.now(),target:h,deleted:false};persistGoals();renderExtras();toast('Цель сохранена!')};
 let editingId=null;
-function storeTimer(){localStorage.setItem(TIMER_KEY,JSON.stringify(timer))}
-function activeTimer(){return timer&&!timer.stopped?timer:null}
-function changeTimer(next){timer={...next,updatedAt:nextStamp(timer?.updatedAt)};storeTimer();renderTimer();scheduleSync()}
+// Timers live in `timers`, keyed by id. A stopped one stays as { id, updatedAt, stopped: true }
+// so an older copy from another device can't bring it back.
+function storeTimers(){localStorage.setItem(TIMERS_KEY,JSON.stringify(timers));localStorage.setItem(TIMER_KEY,JSON.stringify(legacyTimer()))}
+// What a tab on the previous version sees: the most recently changed running timer.
+function legacyTimer(){const all=Object.values(timers),running=all.filter(t=>!t.stopped).sort((a,b)=>b.updatedAt-a.updatedAt)[0];if(running)return running;const newest=Math.max(0,...all.map(t=>Number(t.updatedAt)||0));return newest?{updatedAt:newest,stopped:true}:null}
+function activeTimers(){return Object.values(timers).filter(t=>t&&!t.stopped&&t.segments?.length).sort((a,b)=>a.segments[0].start-b.segments[0].start)}
+function getTimer(id){const t=timers[id];return t&&!t.stopped?t:null}
+function changeTimer(id,next){timers={...timers,[id]:{...next,id,updatedAt:nextStamp(timers[id]?.updatedAt)}};storeTimers();renderTimer();scheduleSync()}
 function fmtClock(ms){let s=Math.floor(ms/1000);return `${Math.floor(s/3600)}:${String(Math.floor(s/60)%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`}
 function fmtStarted(t){let d=new Date(t.segments[0].start);return `${iso(d)===iso(new Date())?'сегодня':fmtDate(d,{day:'numeric',month:'short'})} в ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
-function timerButtons(running,short){return `<button class="btn" data-timer="${running?'pause':'resume'}" aria-label="${running?'Пауза':'Продолжить'}">${ic(running?'pause':'play')}${short?'':running?'Пауза':'Продолжить'}</button><button class="btn primary" data-timer="stop" aria-label="Стоп">${ic('stop')}${short?'':'Стоп'}</button>`}
+// Short form for small cards: "с 15:42", with the date when it began on another day.
+function fmtStartedShort(t){let d=new Date(t.segments[0].start),time=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;return iso(d)===iso(new Date())?`с ${time}`:`с ${fmtDate(d,{day:'numeric',month:'short'})} ${time}`}
+function timerButtons(running,short){return `<button class="btn" data-timer="${running?'pause':'resume'}" aria-label="${running?'Пауза':'Продолжить'}" title="${running?'Пауза':'Продолжить'}">${ic(running?'pause':'play')}${short?'':running?'Пауза':'Продолжить'}</button><button class="btn primary" data-timer="stop" aria-label="Стоп" title="Стоп">${ic('stop')}${short?'':'Стоп'}</button>`}
+function timerCard(t,compact){
+ const now=Date.now(),running=TimerLogic.isRunning(t),check=TimerLogic.needsCheck(t,now);
+ return `<div class="live-timer ${running?'active':'paused'}${check?' needs-check':''}${compact?' compact':''}" data-timer-id="${esc(t.id)}"><div class="timer-info"><div class="timer-name"><i class="dot" style="background:${color(t.type)}"></i>${esc(t.type)}</div><div class="timer-clock" data-clock="${esc(t.id)}">${fmtClock(TimerLogic.totals(t,now).activeMs)}</div><div class="timer-state">${check?'Идёт уже долго. Всё ещё занимаетесь?':compact?`${running?'Идёт':'Пауза'} · ${fmtStartedShort(t)}`:`${running?'Идёт':'На паузе'} · начато ${fmtStarted(t)}`}</div></div><div class="timer-buttons">${check?`<button class="btn" data-timer="keep">${compact?'Да':'Да, продолжаю'}</button>`:''}${timerButtons(running,compact)}</div></div>`;
+}
 function renderTimer(){
- const box=$('#liveTimer'),bar=$('#timerBar'),t=activeTimer();
- if(!t){
-  box.className='live-timer';
-  box.innerHTML=`<div class="timer-info"><div class="timer-label">Таймер</div><div class="timer-name">${esc(selected||'Выберите занятие')}</div></div><div class="timer-buttons"><button class="btn primary" data-timer="start" ${selected?'':'disabled'}>${ic('play')}Старт</button></div>`;
+ const box=$('#liveTimer'),bar=$('#timerBar'),list=activeTimers();
+ if(!list.length){
+  box.innerHTML=`<div class="live-timer"><div class="timer-info"><div class="timer-label">Таймер</div><div class="timer-name">${esc(selected||'Выберите занятие')}</div></div><div class="timer-buttons"><button class="btn primary" data-timer="start" ${selected?'':'disabled'}>${ic('play')}Старт</button></div></div>`;
   bar.innerHTML='';
  }else{
-  const running=TimerLogic.isRunning(t),time=fmtClock(TimerLogic.totals(t,Date.now()).activeMs);
-  const check=TimerLogic.needsCheck(t,Date.now());
-  box.className='live-timer '+(running?'active':'paused')+(check?' needs-check':'');
-  box.innerHTML=`<div class="timer-info"><div class="timer-name"><i class="dot" style="background:${color(t.type)}"></i>${esc(t.type)}</div><div class="timer-clock">${time}</div><div class="timer-state">${check?'Идёт уже долго. Всё ещё занимаетесь?':`${running?'Идёт':'На паузе'} · начато ${fmtStarted(t)}`}</div></div><div class="timer-buttons">${check?'<button class="btn" data-timer="keep">Да, продолжаю</button>':''}${timerButtons(running,false)}</div>`;
-  bar.innerHTML=`<div class="timer-info"><div class="timer-name"><i class="dot" style="background:${color(t.type)}"></i>${esc(t.type)}${running?check?' · ещё занимаетесь?':'':' · пауза'}</div><div class="timer-clock">${time}</div></div><div class="timer-buttons">${timerButtons(running,true)}</div>`;
-  bar.classList.toggle('paused',!running);
+  // "+" starts one more timer for the activity chosen above, one timer per activity.
+  const free=selected&&!list.some(t=>t.type===selected);
+  box.innerHTML=list.map(t=>timerCard(t,list.length>1)).join('')+`<button class="timer-add" data-timer="start" ${free?'':'disabled'}><span class="plus" aria-hidden="true">+</span>${free?`<span>Ещё таймер: <b>${esc(selected)}</b></span>`:'<span>Для ещё одного таймера выберите занятие выше</span>'}</button>`;
+  bar.innerHTML=list.map(t=>{const now=Date.now(),running=TimerLogic.isRunning(t),check=TimerLogic.needsCheck(t,now);return `<div class="bar-row${running?'':' paused'}" data-timer-id="${esc(t.id)}"><div class="timer-info"><div class="timer-name"><i class="dot" style="background:${color(t.type)}"></i>${esc(t.type)}${running?check?' · ещё занимаетесь?':'':' · пауза'}</div><div class="timer-clock" data-clock="${esc(t.id)}">${fmtClock(TimerLogic.totals(t,now).activeMs)}</div></div><div class="timer-buttons">${timerButtons(running,true)}</div></div>`}).join('');
+  document.body.style.setProperty('--bar-rows',list.length);
  }
  updateTimerBar();
 }
-// The bar shows only while a timer runs and the main timer block is off screen.
+// The bar shows only while a timer runs and the timer block is off screen.
 let timerBoxOnScreen=true;
-function updateTimerBar(){const show=Boolean(activeTimer())&&!timerBoxOnScreen;$('#timerBar').classList.toggle('show',show);document.body.classList.toggle('timer-bar-on',show)}
+function updateTimerBar(){const show=activeTimers().length>0&&!timerBoxOnScreen;$('#timerBar').classList.toggle('show',show);document.body.classList.toggle('timer-bar-on',show)}
 if('IntersectionObserver' in window)new IntersectionObserver(([entry])=>{timerBoxOnScreen=entry.isIntersecting;updateTimerBar()}).observe($('#liveTimer'));
-let stopTimeEdited=false;
+// The stop dialog works on one timer at a time.
+let stopTimeEdited=false,stopId=null;
 // The chosen end moment, or null if the typed time isn't valid.
 function chosenStop(t,now){return stopTimeEdited?TimerLogic.resolveStopTime(t,now,$('#stopTime').value):TimerLogic.lastActivity(t,now)}
 function updateStopSummary(){
- const t=activeTimer();if(!t)return;
+ const t=getTimer(stopId);if(!t)return;
  const now=Date.now(),stop=chosenStop(t,now);
  $('#stopError').hidden=stop!==null;$('#stopConfirm').disabled=stop===null;
  if(stop===null)return;
  const {activeMs,pausedMs}=TimerLogic.totals(TimerLogic.stoppedAt(t,stop),stop),tooShort=activeMs<TimerLogic.MIN_ACTIVE_MS;
  $('#stopSummary').innerHTML=`<div>${esc(t.type)}</div><strong>${fmtClock(activeMs)}</strong><div>Начато ${fmtStarted(t)}${pausedMs>=60000?` · на паузе ${hm(pausedMs/60000)}`:''}</div>${tooShort?'<div>Меньше 30 секунд: запись не сохранится.</div>':''}`;
 }
-function openStopDialog(){
- const t=activeTimer();if(!t)return;
+function openStopDialog(id){
+ const t=getTimer(id);if(!t)return;
+ stopId=id;
  const last=new Date(TimerLogic.lastActivity(t,Date.now()));
  stopTimeEdited=false;
  $('#stopTime').value=`${String(last.getHours()).padStart(2,'0')}:${String(last.getMinutes()).padStart(2,'0')}`;
  $('#stopNote').value='';updateStopSummary();$('#stopDialog').showModal();
 }
 function finishTimer(){
- const t=activeTimer();if(!t)return;
+ const t=getTimer(stopId);if(!t)return;
  const stop=chosenStop(t,Date.now());if(stop===null)return;
  const entries=TimerLogic.toEntries(TimerLogic.stoppedAt(t,stop),stop),note=$('#stopNote').value.trim();
  for(const entry of entries){
@@ -674,28 +724,42 @@ function finishTimer(){
   if(existing)Object.assign(existing,entry,{updatedAt:nextStamp(existing.updatedAt)},note?{note}:{});
   else data.push({...entry,note,updatedAt:Date.now()});
  }
- timer={updatedAt:nextStamp(t.updatedAt),stopped:true};storeTimer();
+ timers={...timers,[t.id]:{id:t.id,updatedAt:nextStamp(t.updatedAt),stopped:true}};storeTimers();
  date=entries.length?parse(entries.at(-1).date):new Date();date.setHours(0,0,0,0);
  save();render();renderTimer();
  toast(entries.length?'Занятие сохранено':'Меньше 30 секунд: запись не сохранена');
 }
 function discardTimer(){
- const t=activeTimer();if(!t)return;
- changeTimer({stopped:true});
- toastWithAction('Таймер удалён','Отменить',()=>{changeTimer(t);toast('Таймер восстановлен')});
+ const t=getTimer(stopId);if(!t)return;
+ changeTimer(t.id,{stopped:true});
+ toastWithAction('Таймер удалён','Отменить',()=>{changeTimer(t.id,t);toast('Таймер восстановлен')});
 }
 $('#stopTime').addEventListener('input',()=>{stopTimeEdited=true;updateStopSummary()});
 $('#stopDiscard').onclick=()=>{$('#stopDialog').close();discardTimer()};
 $('#liveTimer').onclick=$('#timerBar').onclick=e=>{
- const action=e.target.closest('[data-timer]')?.dataset.timer,t=activeTimer(),now=Date.now();
- if(action==='start'&&selected&&!t)changeTimer({id:crypto.randomUUID(),type:selected,segments:[{start:now,end:null}]});
- else if(action==='pause'&&t&&TimerLogic.isRunning(t))changeTimer({...t,segments:t.segments.map((s,i)=>i===t.segments.length-1?{...s,end:now}:s)});
- else if(action==='resume'&&t&&!TimerLogic.isRunning(t))changeTimer({...t,segments:[...t.segments,{start:now,end:null}]});
- else if(action==='keep'&&t)changeTimer({...t,checkedMs:TimerLogic.totals(t,now).activeMs});
- else if(action==='stop')openStopDialog();
+ const button=e.target.closest('[data-timer]');if(!button)return;
+ const action=button.dataset.timer,id=button.closest('[data-timer-id]')?.dataset.timerId,t=id?getTimer(id):null,now=Date.now();
+ if(action==='start'){
+  if(!selected)return;
+  if(activeTimers().some(x=>x.type===selected)){toast(`Таймер «${selected}» уже идёт`);return}
+  const newId=crypto.randomUUID();changeTimer(newId,{type:selected,segments:[{start:now,end:null}]});
+ }
+ else if(action==='pause'&&t&&TimerLogic.isRunning(t))changeTimer(t.id,{...t,segments:t.segments.map((s,i)=>i===t.segments.length-1?{...s,end:now}:s)});
+ else if(action==='resume'&&t&&!TimerLogic.isRunning(t))changeTimer(t.id,{...t,segments:[...t.segments,{start:now,end:null}]});
+ else if(action==='keep'&&t)changeTimer(t.id,{...t,checkedMs:TimerLogic.totals(t,now).activeMs});
+ else if(action==='stop'&&t)openStopDialog(t.id);
 };
 $('#stopConfirm').onclick=()=>{$('#stopDialog').close();finishTimer()};$('#stopCancel').onclick=()=>$('#stopDialog').close();
-setInterval(()=>{const t=activeTimer();if(t&&TimerLogic.isRunning(t)){if(TimerLogic.needsCheck(t,Date.now())!==$('#liveTimer').classList.contains('needs-check'))renderTimer();const time=fmtClock(TimerLogic.totals(t,Date.now()).activeMs);document.querySelectorAll('.timer-clock').forEach(el=>el.textContent=time)}},1000);
+setInterval(()=>{
+ const now=Date.now();
+ for(const t of activeTimers()){
+  if(!TimerLogic.isRunning(t))continue;
+  const card=document.querySelector(`#liveTimer [data-timer-id="${CSS.escape(t.id)}"]`);
+  if(card&&TimerLogic.needsCheck(t,now)!==card.classList.contains('needs-check')){renderTimer();return}
+  const time=fmtClock(TimerLogic.totals(t,now).activeMs);
+  document.querySelectorAll(`[data-clock="${CSS.escape(t.id)}"]`).forEach(el=>el.textContent=time);
+ }
+},1000);
 function beginEdit(id){let item=data.find(x=>x.id===id);if(!item)return;editingId=id;date=parse(item.date);selected=item.type;$('#start').value=item.start;$('#end').value=item.end;$('#note').value=item.note||'';$('#entryTitle').textContent='Изменить занятие';$('#addBtn').textContent='Сохранить изменения';$('#editBanner').classList.add('show');$('#manualEntry').open=true;renderTypes();updateDuration();render();document.querySelector('.entry').scrollIntoView({behavior:'smooth',block:'center'})}
 function cancelEdit(){editingId=null;timesTouched=false;refreshDefaultTimes();$('#entryTitle').textContent='Добавить занятие';$('#addBtn').textContent='Добавить';$('#editBanner').classList.remove('show');$('#note').value='';renderTypes();updateDuration()}
 $('#cancelEdit').onclick=cancelEdit;
@@ -764,15 +828,17 @@ const SYNC_URL='https://fofvjbihskblycohaltt.supabase.co',SYNC_KEY='sb_publishab
 const syncDialog=$('#syncDialog');function setSyncStatus(t){$('#syncStatus').textContent=t}
 // Header line and button show the state, so a failed sync is not hidden inside the dialog.
 function setSyncHint(state,text){$('#saveHint').textContent=text;$('#syncBtn').classList.toggle('sync-error',state==='error');$('#syncBtn').title=state==='error'?text:''}
-function cloudPayload(){return {v:2,activities:data,deletedIds:[...deletedIds],goals,deletedGoals:[...deletedGoals],goalChanges,types:TYPES,hidden:[...HIDDEN],deletedTypes:[...deletedTypes],typeChanges,...(typeOrder?{typeOrder}:{}),timer:timer||null,highlights}}
+function cloudPayload(){return {v:2,activities:data,deletedIds:[...deletedIds],goals,deletedGoals:[...deletedGoals],goalChanges,types:TYPES,hidden:[...HIDDEN],deletedTypes:[...deletedTypes],typeChanges,...(typeOrder?{typeOrder}:{}),timers,timer:legacyTimer(),highlights}}
 function adoptState(s){
  data=s.activities;deletedIds=new Set(s.deletedIds);
  goals=s.goals;deletedGoals=new Set(s.deletedGoals);goalChanges=s.goalChanges;
  TYPES.splice(0,TYPES.length,...s.types);HIDDEN.clear();s.hidden.forEach(n=>HIDDEN.add(n));
  deletedTypes=new Set(s.deletedTypes);typeChanges=s.typeChanges;typeOrder=s.typeOrder;
  // Stores locally without scheduling a sync: a sync must never trigger another sync.
- timer=s.timer||null;highlights=s.highlights;
- storeEntries();storeGoals();storeTypes();storeTimer();storeHighlights();
+ // An out-of-date sync script only knows the single timer: keep this tab's list and add that one.
+ if(s.timers)timers=s.timers;else if(s.timer?.id&&!s.timer.stopped&&!((timers[s.timer.id]?.updatedAt||0)>=s.timer.updatedAt))timers={...timers,[s.timer.id]:s.timer};
+ highlights=s.highlights;
+ storeEntries();storeGoals();storeTypes();storeTimers();storeHighlights();
 }
 function scheduleSync(){if(!sb)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>{syncTimer=null;syncCloud(false)},1100)}
 // No connection isn't a failure: changes are safe on this device and go out when it's back.

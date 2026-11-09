@@ -114,13 +114,55 @@
     return { updatedAt: stamp(winner), names };
   }
 
-  // The timer is one record: its newest state wins, whichever device changed it.
-  function mergeTimer(local, remote, changes) {
+  // Several timers can run at once. `timers` maps each timer's id to its newest state; a
+  // stopped timer leaves { id, updatedAt, stopped: true } so an older copy can't restart it.
+  // Stopped records older than this, next to the newest change, are dropped.
+  const STOPPED_KEPT_MS = 30 * 86400000;
+
+  // The previous version kept one `timer` field, and a tab running it may still write that.
+  // Its newest state is read as before. When a stop without an id beat a running copy,
+  // that stop belongs to the running copy's timer.
+  function legacyTimers(local, remote) {
     const l = local.timer || null;
     const r = remote.timer || null;
     const winner = l && (!r || stamp(l) > stamp(r)) ? l : r;
-    if (!winner || winner.stopped) return winner;
-    return { ...winner, type: resolveType(winner.type, changes) };
+    const loser = winner === l ? r : l;
+    if (!winner) return [];
+    if (!winner.stopped) return winner.id ? [winner] : [];
+    if (loser && !loser.stopped && loser.id && stamp(loser) < stamp(winner)) return [{ id: loser.id, updatedAt: stamp(winner), stopped: true }];
+    return [];
+  }
+
+  function mergeTimers(local, remote, changes) {
+    const merged = {};
+    const offer = (item) => {
+      if (!item || !item.id) return;
+      const existing = merged[item.id];
+      if (!existing || stamp(item) > stamp(existing) || (stamp(item) === stamp(existing) && item.stopped)) merged[item.id] = item;
+    };
+    // Cloud first, so on a tie the cloud copy stays.
+    Object.values(remote.timers || {}).forEach(offer);
+    Object.values(local.timers || {}).forEach(offer);
+    legacyTimers(local, remote).forEach(offer);
+    const newest = Math.max(0, ...Object.values(merged).map(stamp));
+    const timers = {};
+    for (const [id, item] of Object.entries(merged)) {
+      if (item.stopped) {
+        if (newest - stamp(item) <= STOPPED_KEPT_MS) timers[id] = item;
+      } else {
+        timers[id] = { ...item, type: resolveType(item.type, changes) };
+      }
+    }
+    return timers;
+  }
+
+  // What an older tab sees: the most recently changed running timer, or a plain stop.
+  function legacyTimerOf(timers, local, remote) {
+    const all = Object.values(timers);
+    const running = all.filter((t) => !t.stopped).sort((a, b) => stamp(b) - stamp(a))[0];
+    if (running) return running;
+    const newest = Math.max(0, ...all.map(stamp), stamp(local.timer), stamp(remote.timer));
+    return newest || local.timer || remote.timer ? { updatedAt: newest, stopped: true } : null;
   }
 
   // One highlight per day; the newest change wins. Clearing one keeps an empty record,
@@ -138,6 +180,7 @@
     remote = remote || {};
     const typeChanges = mergeTypeChanges(typeChangesOf(local), typeChangesOf(remote));
     const typeOrder = mergeTypeOrder(local, remote, typeChanges);
+    const timers = mergeTimers(local, remote, typeChanges);
     return {
       v: 2,
       ...mergeActivities(local, remote, typeChanges),
@@ -147,7 +190,8 @@
       deletedTypes: Object.keys(typeChanges).filter((name) => typeChanges[name].deleted),
       typeChanges,
       typeOrder,
-      timer: mergeTimer(local, remote, typeChanges),
+      timers,
+      timer: legacyTimerOf(timers, local, remote),
       highlights: mergeHighlights(local, remote),
     };
   }

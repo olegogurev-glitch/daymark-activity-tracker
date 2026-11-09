@@ -1,7 +1,7 @@
 // Run with: node --test tests/
 const test = require('node:test');
 const assert = require('node:assert');
-const { periodStats, orderByUse, lastUsed } = require('../stats.js');
+const { periodStats, orderByUse, lastUsed, goalStatus } = require('../stats.js');
 
 const TODAY = '2026-11-05'; // A Thursday.
 const e = (date, minutes, type = 'работа') => ({ date, minutes, type });
@@ -140,4 +140,25 @@ test('the last used activity is the most recent entry on offer', () => {
   assert.equal(lastUsed(['работа', 'чтение', 'ходьба'], entries), 'чтение');
   assert.equal(lastUsed(['работа', 'ходьба'], entries), 'работа');
   assert.equal(lastUsed(['работа'], []), null);
+});
+
+// Week of Monday 2026-11-09 to Sunday 2026-11-15; goal of 3 hours (about 26 minutes a day).
+const goal = (minutes, today) => goalStatus({ targetMinutes: 180, minutes, weekFrom: '2026-11-09', today });
+
+test('a goal says nothing early in the week, unless it is already reached', () => {
+  assert.deepEqual(goal(0, '2026-11-12'), { state: 'early' });
+  assert.deepEqual(goal(180, '2026-11-10'), { state: 'done' });
+});
+
+test('from Friday a goal is on track while the rest fits its usual daily share', () => {
+  assert.deepEqual(goal(120, '2026-11-13'), { state: 'on-track', remaining: 60, daysLeft: 3 });
+  assert.deepEqual(goal(60, '2026-11-13'), { state: 'at-risk', remaining: 120, daysLeft: 3 });
+  assert.deepEqual(goal(160, '2026-11-15'), { state: 'on-track', remaining: 20, daysLeft: 1 });
+  assert.deepEqual(goal(140, '2026-11-15'), { state: 'at-risk', remaining: 40, daysLeft: 1 });
+});
+
+test('a goal for another week is past or future, any day of that week works as its start', () => {
+  assert.deepEqual(goal(10, '2026-11-16'), { state: 'past' });
+  assert.deepEqual(goal(10, '2026-11-08'), { state: 'future' });
+  assert.deepEqual(goalStatus({ targetMinutes: 180, minutes: 0, weekFrom: '2026-11-12', today: '2026-11-14' }).daysLeft, 2);
 });

@@ -184,3 +184,44 @@ test('a paused timer never asks, and pauses do not count towards the 4 hours', (
   assert.equal(needsCheck(t, at(16, 0)), false);
   assert.equal(needsCheck(t, at(17, 0)), true);
 });
+
+const run = (id, type, updatedAt) => ({ id, type, updatedAt, segments: [{ start: 1, end: null }] });
+
+test('two timers run side by side and sync on their own', () => {
+  const a = run('a', 'чтение', 100), b = run('b', 'ходьба', 150);
+  const merged = mergeStates({ timers: { a } }, { timers: { b } });
+  assert.deepEqual(Object.keys(merged.timers).sort(), ['a', 'b']);
+  // Stopping one on another device leaves the other running.
+  const stopped = { id: 'a', updatedAt: 200, stopped: true };
+  const after = mergeStates({ timers: { a, b } }, { timers: { a: stopped, b } });
+  assert.deepEqual(after.timers.a, stopped);
+  assert.deepEqual(after.timers.b, b);
+  // An older tab sees the most recently changed running timer.
+  assert.deepEqual(after.timer, b);
+});
+
+test('a timer started in an older tab joins the list', () => {
+  const a = run('a', 'чтение', 100), old = run('x', 'танцы', 300);
+  const merged = mergeStates({ timers: { a }, timer: a }, { timer: old });
+  assert.deepEqual(Object.keys(merged.timers).sort(), ['a', 'x']);
+});
+
+test('a stop from an older tab stops the timer it was showing, not the others', () => {
+  const a = run('a', 'чтение', 100), b = run('b', 'ходьба', 150);
+  // This tab told older tabs about b; an older tab then stopped it (a stop has no id there).
+  const merged = mergeStates({ timers: { a, b }, timer: b }, { timer: { updatedAt: 400, stopped: true } });
+  assert.equal(merged.timers.b.stopped, true);
+  assert.equal(merged.timers.a.stopped, undefined);
+});
+
+test('old stopped timers are dropped after 30 days, running ones are kept', () => {
+  const day = 86400000;
+  const merged = mergeStates({ timers: { s: { id: 's', updatedAt: day, stopped: true }, a: run('a', 'чтение', 2 * day), n: run('n', 'чтение', 40 * day) } }, {});
+  assert.deepEqual(Object.keys(merged.timers).sort(), ['a', 'n']);
+});
+
+test('every running timer follows a rename', () => {
+  const cloud = { types: [['книги', '#1']], typeChanges: { 'чтение': { updatedAt: 200, deleted: true, renamedTo: 'книги' }, 'книги': { updatedAt: 200, deleted: false, color: '#1', hidden: false } } };
+  const merged = mergeStates({ timers: { a: run('a', 'чтение', 1), b: run('b', 'чтение', 2) } }, cloud);
+  assert.deepEqual(Object.values(merged.timers).map((t) => t.type), ['книги', 'книги']);
+});

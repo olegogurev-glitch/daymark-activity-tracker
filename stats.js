@@ -156,7 +156,23 @@
     return latest ? latest.type : null;
   }
 
-  const api = { periodStats, orderByUse, lastUsed };
+  // How a weekly goal stands. Early in the week nothing is said, so the goal doesn't nag.
+  // In the last three days (Friday to Sunday) it is "on-track" if the time left fits the
+  // goal's usual daily share (a seventh of it) for each remaining day, today included, and
+  // "at-risk" if not. A reached goal is "done" whenever it happens.
+  const LAST_DAYS = 3;
+  function goalStatus({ targetMinutes, minutes, weekFrom, today }) {
+    if (minutes >= targetMinutes) return { state: 'done' };
+    const monday = mondayOf(toNumber(weekFrom));
+    const todayN = toNumber(today);
+    if (todayN < monday || todayN > monday + 6) return { state: todayN > monday + 6 ? 'past' : 'future' };
+    const daysLeft = monday + 6 - todayN + 1;
+    if (daysLeft > LAST_DAYS) return { state: 'early' };
+    const remaining = targetMinutes - minutes;
+    return { state: remaining <= (targetMinutes / 7) * daysLeft ? 'on-track' : 'at-risk', remaining, daysLeft };
+  }
+
+  const api = { periodStats, orderByUse, lastUsed, goalStatus };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.StatsLogic = api;
 })(typeof window !== 'undefined' ? window : globalThis);
