@@ -161,3 +161,34 @@ test('with jokes off the phrases skip the sofa and laziness, and never come up e
     assert.ok(!/диван|лень|лежа/i.test(phrase), phrase);
   }
 });
+
+test('in English, the summary and the daily phrase are English', () => {
+  const { LINES_EN, PHRASES_EN } = require('../day-summary.js');
+  const en = (over) => run({ lang: 'en', ...over });
+  assert.ok(en({ entries: [...history, entry(TODAY, 30)] }).text.includes('30 min'));
+  assert.ok(en({ entries: [...history, entry(TODAY, 400)] }).text.includes('6 h 40 min'));
+  const three = [2, 1, 0].map((n) => entry(daysBefore(n), 30, 'drawing'));
+  assert.match(en({ entries: three }).text, /“drawing”: 3 days in a row/);
+  assert.match(en({ entries: [entry('2026-11-05', 150, 'reading')], goals: { reading: 2.5 } }).text, /Goal reached: 2\.5 h of reading/);
+  assert.equal(en({ entries: history, jokes: false }).text, 'No entries today.');
+  assert.ok(PHRASES_EN.includes(dailyPhrase('2026-11-05', true, 'en')));
+  // Same kinds of line as in Russian, and every phrase comes up once before any repeats.
+  assert.deepEqual(Object.keys(LINES_EN).sort(), Object.keys(LINES).sort());
+  const seen = new Set();
+  for (let n = 0; n < PHRASES_EN.length; n++) seen.add(dailyPhrase(daysBefore(n), true, 'en'));
+  assert.equal(seen.size, PHRASES_EN.length);
+});
+
+test('in English with jokes off, no line or phrase mentions the couch or laziness', () => {
+  for (let n = 0; n < 60; n++) {
+    const date = daysBefore(n);
+    for (const entries of [history, [...history, entry(date, 30)], [...history, entry(date, 200)], [...history, entry(date, 500)]]) {
+      for (const hour of [9, 21]) {
+        const { text } = summarize({ date, today: date, hour, entries, goals: {}, jokes: false, lang: 'en' });
+        assert.ok(!/couch|laz/i.test(text), text);
+        assert.ok(!/[а-яё]/i.test(text.replace(/работа|чтение/g, '')), text);
+      }
+    }
+    assert.ok(!/couch|laz|lying/i.test(dailyPhrase(date, false, 'en')));
+  }
+});

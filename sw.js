@@ -8,6 +8,7 @@ const NETWORK_TIMEOUT_MS = 4000;
 
 const APP_FILES = [
   './',
+  'i18n.js',
   'sync-merge.js',
   'timer-logic.js',
   'day-summary.js',
