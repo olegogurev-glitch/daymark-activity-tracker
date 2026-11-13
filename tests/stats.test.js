@@ -162,3 +162,41 @@ test('a goal for another week is past or future, any day of that week works as i
   assert.deepEqual(goal(10, '2026-11-08'), { state: 'future' });
   assert.deepEqual(goalStatus({ targetMinutes: 180, minutes: 0, weekFrom: '2026-11-12', today: '2026-11-14' }).daysLeft, 2);
 });
+
+const { weekReview, previousWeekStart } = require('../stats.js');
+
+test('last week is the Monday-to-Sunday week before today’s', () => {
+  assert.equal(previousWeekStart('2026-11-13'), '2026-11-02'); // Friday
+  assert.equal(previousWeekStart('2026-11-09'), '2026-11-02'); // Monday
+  assert.equal(previousWeekStart('2026-11-08'), '2026-10-26'); // Sunday
+});
+
+test('a week review counts goals, days and each activity', () => {
+  const entries = [
+    e('2026-11-02', 120, 'рисование'), e('2026-11-04', 90, 'рисование'), e('2026-11-04', 40, 'чтение'),
+    e('2026-11-08', 45, 'чтение'), e('2026-11-09', 500, 'чтение'), // next week: left out
+    e('2026-10-30', 60, 'рисование'), e('2026-10-28', 40, 'танцы'), // the week before
+  ];
+  const r = weekReview({ ref: '2026-11-05', entries, goals: { 'рисование': 3, 'чтение': 2, 'танцы': 1 } });
+  assert.equal(r.from, '2026-11-02');
+  assert.equal(r.to, '2026-11-08');
+  assert.equal(r.total, 295);
+  assert.equal(r.previousTotal, 100);
+  assert.equal(r.sessions, 4);
+  assert.equal(r.activeDays, 3);
+  assert.deepEqual(r.bestDay, { date: '2026-11-04', minutes: 130 });
+  assert.deepEqual(r.days.map((d) => d.minutes), [120, 0, 130, 0, 0, 0, 45]);
+  assert.deepEqual(r.activities, [
+    { type: 'рисование', minutes: 210, sessions: 2, previousMinutes: 60, days: 2 },
+    { type: 'чтение', minutes: 85, sessions: 2, previousMinutes: 0, days: 2 },
+  ]);
+  assert.equal(r.goalsDone, 1);
+  assert.deepEqual(r.goals.map((g) => [g.type, g.done, g.missing]), [['рисование', true, 0], ['чтение', false, 35], ['танцы', false, 60]]);
+});
+
+test('an empty week has no best day, and broken goals are skipped', () => {
+  const r = weekReview({ ref: '2026-11-05', entries: [], goals: { 'чтение': 0, 'танцы': 'x' } });
+  assert.equal(r.total, 0);
+  assert.equal(r.bestDay, null);
+  assert.deepEqual(r.goals, []);
+});

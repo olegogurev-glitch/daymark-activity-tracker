@@ -172,7 +172,81 @@
     return { state: remaining <= (targetMinutes / 7) * daysLeft ? 'on-track' : 'at-risk', remaining, daysLeft };
   }
 
-  const api = { periodStats, orderByUse, lastUsed, goalStatus };
+  // Everything the "week in review" popup shows for the Monday-to-Sunday week holding `ref`:
+  // totals, each day, every goal (by the goals set now, since older targets aren't kept) and
+  // each activity with its change from the week before.
+  function weekReview({ ref, entries, goals = {} }) {
+    const monday = mondayOf(toNumber(ref));
+    const from = toDate(monday);
+    const to = toDate(monday + 6);
+    const prevFrom = toDate(monday - 7);
+    const prevTo = toDate(monday - 1);
+    const byType = new Map();
+    const byDay = new Map();
+    const activity = (type) => {
+      if (!byType.has(type)) byType.set(type, { type, minutes: 0, sessions: 0, dates: new Set(), previousMinutes: 0 });
+      return byType.get(type);
+    };
+    let total = 0;
+    let previousTotal = 0;
+    let sessions = 0;
+    for (const e of entries) {
+      if (!(e.minutes > 0)) continue;
+      if (e.date >= from && e.date <= to) {
+        const a = activity(e.type);
+        a.minutes += e.minutes;
+        a.sessions++;
+        a.dates.add(e.date);
+        byDay.set(e.date, (byDay.get(e.date) || 0) + e.minutes);
+        total += e.minutes;
+        sessions++;
+      } else if (e.date >= prevFrom && e.date <= prevTo) {
+        previousTotal += e.minutes;
+        // Only activities done this week get a row (filtered below); the week before is for comparing.
+        activity(e.type).previousMinutes += e.minutes;
+      }
+    }
+    const days = [];
+    let bestDay = null;
+    for (let n = monday; n <= monday + 6; n++) {
+      const date = toDate(n);
+      const minutes = byDay.get(date) || 0;
+      days.push({ date, minutes });
+      if (minutes && (!bestDay || minutes > bestDay.minutes)) bestDay = { date, minutes };
+    }
+    const activities = [...byType.values()]
+      .filter((a) => a.minutes > 0)
+      .map(({ dates, ...a }) => ({ ...a, days: dates.size }))
+      .sort((a, b) => b.minutes - a.minutes);
+    const goalRows = Object.entries(goals)
+      .filter(([, hours]) => Number(hours) > 0)
+      .map(([type, hours]) => {
+        const targetMinutes = Math.round(Number(hours) * 60);
+        const minutes = byType.get(type)?.minutes || 0;
+        return { type, targetMinutes, minutes, done: minutes >= targetMinutes, missing: Math.max(0, targetMinutes - minutes) };
+      })
+      .sort((a, b) => b.done - a.done || b.minutes / b.targetMinutes - a.minutes / a.targetMinutes);
+    return {
+      from,
+      to,
+      total,
+      previousTotal,
+      sessions,
+      activeDays: days.filter((d) => d.minutes > 0).length,
+      bestDay,
+      days,
+      activities,
+      goals: goalRows,
+      goalsDone: goalRows.filter((g) => g.done).length,
+    };
+  }
+
+  // The Monday of the week before the one holding `today`.
+  function previousWeekStart(today) {
+    return toDate(mondayOf(toNumber(today)) - 7);
+  }
+
+  const api = { periodStats, orderByUse, lastUsed, goalStatus, weekReview, previousWeekStart };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.StatsLogic = api;
 })(typeof window !== 'undefined' ? window : globalThis);

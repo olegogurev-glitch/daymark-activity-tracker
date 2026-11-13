@@ -292,6 +292,31 @@
     'Занятие удалено': 'Activity deleted',
     'Переименовать занятие': 'Rename activity',
     'Новое название': 'New name',
+
+    // Week in review
+    'Итоги прошлой недели': 'Last week in review',
+    'Итоги недели': 'Week in review',
+    'Неделей раньше': 'Week before',
+    'Неделей позже': 'Week after',
+    'записей не было': 'no entries',
+    'целей: {done} из {all}': 'goals: {done} of {all}',
+    'Прошлая неделя': 'Last week',
+    'Позапрошлая неделя': 'The week before last',
+    'На этой неделе записей не было.': 'No entries this week.',
+    'Все цели выполнены — отличная неделя!': 'Every goal reached — a great week!',
+    'Выполнено целей: {done} из {all}. Хороший результат!': '{done} of {all} goals reached. Nice work!',
+    'Цели в этот раз не набрались, но {time} — тоже результат.': 'The goals didn’t add up this time, but {time} still counts.',
+    '{time} на свои занятия за неделю.': '{time} on your activities this week.',
+    'неделей раньше записей не было': 'no entries the week before',
+    'столько же, сколько неделей раньше': 'the same as the week before',
+    'на {time} больше, чем неделей раньше': '{time} more than the week before',
+    'на {time} меньше, чем неделей раньше': '{time} less than the week before',
+    '{n} из {all}': '{n} of {all}',
+    'целей выполнено': 'goals reached',
+    'дней с занятиями': 'days with activity',
+    'Цели': 'Goals',
+    'Не хватило {time}': '{time} short',
+    'Цели сравниваются с теми, что заданы сейчас.': 'Goals are compared with the ones set now.',
   };
 
   // Words that change with a number: the Russian "one" form is the key, then English one/many.
@@ -302,6 +327,8 @@
     'Вместе с ним удалится {n} запись.': ['{n} entry will be deleted with it.', '{n} entries will be deleted with it.'],
     'Последняя копия: {n} день назад.': ['Last backup: {n} day ago.', 'Last backup: {n} days ago.'],
     'за {n} день': ['in {n} day', 'in {n} days'],
+    '{n} неделю назад': ['{n} week ago', '{n} weeks ago'],
+    '{n} день': ['{n} day', '{n} days'],
   };
 
   const LISTS = {

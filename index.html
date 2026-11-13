@@ -366,6 +366,44 @@ body.timer-bar-on .toast{bottom:calc(28px + 64px*var(--bar-rows,1))}
 #startProblem{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:12px 16px;background:var(--night);color:#fff;font-size:14px;text-align:center}
 #startProblem button{min-height:38px;padding:7px 13px;border:0;border-radius:10px;background:#fff;color:var(--night);font-weight:600}
 
+/* Week in review: a card that opens a popup with the finished week. */
+.week-card{display:flex;align-items:center;gap:13px;width:100%;padding:16px 18px;text-align:left;background:linear-gradient(115deg,#f3f0fb,#e9e4f6);border-color:#ddd5ef;transition:border-color .15s,box-shadow .15s}
+.week-card:hover{border-color:#c4b9e2;box-shadow:0 1px 2px #2a24400a,0 12px 30px #4b3f7224}
+.week-card-icon{flex:none;display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:#ffffffc2;color:var(--accent)}
+.week-card-body{flex:1;min-width:0;display:grid;gap:2px}
+.week-card-label{font:600 17px/1.25 var(--serif)}
+.week-card-line{font-size:13px;color:var(--ink-2)}
+.week-card-go{color:var(--ink-3)}
+.week-dialog{width:min(560px,calc(100vw - 24px))}
+.week-dialog .sync-head p{margin-bottom:12px}
+.week-nav{display:flex;align-items:center;gap:8px;margin:0 0 16px}
+.week-nav span{flex:1;text-align:center;font-weight:600}
+.week-nav .iconbtn{width:38px;height:38px}
+.week-verdict{margin:0 0 18px;padding:12px 14px;border-radius:14px;background:var(--accent-soft);font-size:15px;font-weight:500;line-height:1.35}
+.week-verdict.done{background:var(--teal-soft);color:var(--teal)}
+.week-verdict.empty{background:var(--surface-2);color:var(--ink-2)}
+.week-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 14px}
+.week-stats .stat b{font-size:23px;white-space:normal}
+.week-dialog .comparison{margin:0 0 14px}
+.week-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;height:92px;margin-top:4px}
+.week-day{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;min-width:0;font-size:12px;color:var(--ink-3)}
+.week-day i{display:block;width:100%;max-width:30px;min-height:3px;border-radius:4px 4px 0 0;background:#8273bd}
+.week-day.none i{background:var(--surface-3)}
+.week-day.best i{background:#3a2f5f}
+.week-day.best{color:var(--ink);font-weight:600}
+.week-best{margin:10px 0 0;font-size:14px;color:var(--ink-2)}
+.week-best strong{font-weight:600;color:var(--ink)}
+.week-section{margin:24px 0 2px;font:600 19px/1.2 var(--serif)}
+.week-dialog .goal-item{margin-top:10px}
+.goal-item.missed{background:var(--surface-2);--goal-bg:var(--surface-2)}
+.goal-item.missed .goal-status{color:var(--ink-2)}
+.week-act{padding:11px 0 10px;border-top:1px solid var(--line)}
+.week-act:first-of-type{border-top:0}
+.week-act .track{display:block}
+.week-act-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:7px}
+.week-act-meta{margin-top:6px;font-size:13px;color:var(--ink-3)}
+.week-note{margin:18px 0 0;font-size:13px;color:var(--ink-3)}
+
 /* Medium screens: one column for the day's work, two for the overview. */
 @media(max-width:980px){
  .savehint{display:none}
@@ -373,6 +411,7 @@ body.timer-bar-on .toast{bottom:calc(28px + 64px*var(--bar-rows,1))}
  .layout>main,.layout>aside,.lower{display:contents}
  .entry,.highlight-card,.day-card,.backup-note{grid-column:1/-1}
  .entry,.highlight-card{order:1}.day-card,.backup-note{order:2}.summary{order:3}.breakdown{order:4}.goals-card{order:5}.calendar-card{order:6}.habits-card{order:7}.types-card{order:8}
+ .week-card{order:2;grid-column:1/-1}
 }
 /* Phones */
 @media(max-width:640px){
@@ -413,6 +452,8 @@ body.timer-bar-on .toast{bottom:calc(28px + 64px*var(--bar-rows,1))}
  .breakdown{padding:8px 6px}
  .sync-dialog{padding:22px 18px}
  .sync-head h2{font-size:22px}
+ .week-card{padding:13px 15px}.week-card-label{font-size:16px}
+ .week-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.week-stats .stat b{font-size:19px}.week-stats .stat+.stat{padding-left:8px}
  .toast{width:calc(100% - 24px)}
 }
 @media(max-width:360px){.brandname{font-size:16px}#syncBtn{padding:8px 11px;font-size:13px}.date-display{font-size:13px}.period button{font-size:12px;padding:6px 4px}}
@@ -434,6 +475,7 @@ body.timer-bar-on .toast{bottom:calc(28px + 64px*var(--bar-rows,1))}
 <symbol id="i-more" viewBox="0 0 20 20"><g fill="currentColor"><circle cx="4" cy="10" r="1.7"/><circle cx="10" cy="10" r="1.7"/><circle cx="16" cy="10" r="1.7"/></g></symbol>
 <symbol id="i-eye" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 10S4.8 4.5 10 4.5 18.2 10 18.2 10 15.2 15.5 10 15.5 1.8 10 1.8 10z"/><circle cx="10" cy="10" r="2.5"/></g></symbol>
 <symbol id="i-eye-off" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1.8 10S4.8 4.5 10 4.5 18.2 10 18.2 10 15.2 15.5 10 15.5 1.8 10 1.8 10z"/><path d="M3.5 3.5l13 13"/></g></symbol>
+<symbol id="i-cup" viewBox="0 0 20 20"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M6 3h8v4.5a4 4 0 0 1-8 0zM6 5H3.5v1.2A2.6 2.6 0 0 0 6.2 8.8M14 5h2.5v1.2a2.6 2.6 0 0 1-2.7 2.6M10 11.5v3M6.8 17h6.4M8 14.5h4"/></symbol>
 </defs></svg>
 <div class="shell">
 <header class="top"><div class="brand"><div class="mark"><img src="icons/logo-96.png" alt="" width="42" height="42"></div><div class="brandname">мой день</div></div><div class="topright"><span class="savehint" id="saveHint">Данные хранятся на этом устройстве</span><button class="btn" id="syncBtn">Войти</button><button class="btn lang-btn" id="langBtn"></button><details class="more-menu" id="moreMenu"><summary class="btn" aria-label="Импорт и экспорт данных" title="Импорт и экспорт данных"><svg class="ic" aria-hidden="true"><use href="#i-more"/></svg></summary><div class="more-list"><button class="btn" id="importBtn">Импорт</button><button class="btn" id="exportBtn">Экспорт данных</button><button class="btn" id="jokesBtn"></button><button class="btn" id="installBtn">Установить приложение</button></div></details><input type="file" id="importFile" accept="application/json,.json" hidden></div></header>
@@ -441,6 +483,7 @@ body.timer-bar-on .toast{bottom:calc(28px + 64px*var(--bar-rows,1))}
 <dialog class="sync-dialog" id="installDialog"><div class="sync-head"><div><h2>Установить приложение</h2><p>Значок появится на главном экране, и приложение будет открываться даже без интернета.</p></div><button class="sync-close" id="installClose" aria-label="Закрыть"><svg class="ic" aria-hidden="true"><use href="#i-close"/></svg></button></div><ol class="install-steps" id="installSteps"></ol><p class="sync-help" id="installNote"></p></dialog>
 <dialog class="sync-dialog ask-dialog" id="askDialog"><div class="sync-head"><div><h2 id="askTitle"></h2><p id="askText"></p></div></div><div class="sync-field" id="askField"><label for="askInput" id="askLabel"></label><input id="askInput" maxlength="60" autocomplete="off"></div><div class="sync-buttons"><button class="btn primary" id="askConfirm"></button><button class="btn" id="askCancel"></button></div></dialog>
 <dialog class="sync-dialog" id="stopDialog"><div class="sync-head"><div><h2>Точно завершить занятие?</h2><p>Занятие остановится и появится в списке дня.</p></div></div><div class="stop-summary" id="stopSummary"></div><div class="sync-field"><label for="stopTime">Когда закончили</label><input id="stopTime" type="time"><p class="stop-error" id="stopError" hidden>Это время раньше начала занятия.</p></div><div class="sync-field"><label for="stopNote">Заметка (необязательно)</label><input id="stopNote" placeholder="Что-нибудь запомнить"></div><div class="sync-buttons"><button class="btn primary" id="stopConfirm">Да, завершить</button><button class="btn" id="stopCancel">Нет, продолжить</button></div><button class="stop-discard" id="stopDiscard">Удалить без сохранения</button></dialog>
+<dialog class="sync-dialog week-dialog" id="weekDialog" aria-labelledby="weekTitle"><div class="sync-head"><div><h2 id="weekTitle">Итоги недели</h2><p id="weekWhen"></p></div><button class="sync-close" id="weekClose" aria-label="Закрыть"><svg class="ic" aria-hidden="true"><use href="#i-close"/></svg></button></div><div class="week-nav"><button class="iconbtn" id="weekPrev" aria-label="Неделей раньше"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button><span id="weekRange"></span><button class="iconbtn" id="weekNext" aria-label="Неделей позже"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button></div><div id="weekBody"></div></dialog>
 <div class="hero"><div><div class="eyebrow" id="dailyPhrase">Маленькие шаги — тоже дела!</div><h1 id="greeting">Чем сегодня займёмся?</h1></div><div class="date-nav"><button class="iconbtn" id="prevDay" aria-label="Предыдущий день"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button><div class="date-display" id="dateDisplay"></div><button class="iconbtn" id="nextDay" aria-label="Следующий день"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button><button class="btn" id="todayBtn">Сегодня</button></div></div>
 <div class="layout"><main>
 <section class="card entry"><div class="edit-banner" id="editBanner">Редактирование занятия <button type="button" id="cancelEdit">Отменить</button></div><h2 class="cardtitle" id="entryTitle">Добавить занятие</h2><div class="activity-grid" id="activityGrid"></div>
@@ -454,6 +497,7 @@ body.timer-bar-on .toast{bottom:calc(28px + 64px*var(--bar-rows,1))}
 <section class="card habits-card"><div class="pattern-head"><div><h2 class="cardtitle">Ваши привычки</h2><div class="sub">В какие дни что нравится делать</div></div><select id="patternType" aria-label="Занятие для анализа"></select></div><div class="pattern-days" id="patternDays"></div><p class="pattern-copy" id="patternCopy"></p></section>
 </div>
 </main><aside class="side">
+<button type="button" class="card week-card" id="weekCard" hidden><span class="week-card-icon"><svg class="ic" aria-hidden="true"><use href="#i-cup"/></svg></span><span class="week-card-body"><span class="week-card-label">Итоги прошлой недели</span><span class="week-card-line" id="weekCardLine"></span></span><svg class="ic week-card-go" aria-hidden="true"><use href="#i-right"/></svg></button>
 <section class="card summary"><h2 class="cardtitle">Мой ритм</h2><div class="sub">Смотрите, что радует чаще</div><div class="period" id="period"><button data-period="week" class="active" aria-pressed="true">Неделя</button><button data-period="month" aria-pressed="false">Месяц</button><button data-period="all" aria-pressed="false">Всё время</button></div><div class="stats"><div class="stat" title="Одновременные занятия учитываются отдельно"><b id="totalHours">0 мин</b><span>всего времени</span></div><div class="stat"><b id="activeDays">0</b><span id="activeDaysLabel">активных дней</span></div></div><p class="comparison" id="comparison" hidden></p><h3 class="charttitle" id="chartTitle">Часы по дням</h3><div class="bars" id="bars" role="group" aria-labelledby="chartTitle"></div><div class="bar-axis" id="barAxis" aria-hidden="true"></div><div class="bar-readout" id="barReadout" aria-live="polite"></div><div class="insight" id="insight">Пока тут тихо. Добавьте пару занятий — и увидите свой ритм!</div></section>
 <section class="card goals-card"><h2 class="cardtitle">Недельные цели</h2><div class="sub">Поставьте себе цель — в своём темпе</div><div class="goal-form"><select id="goalType" aria-label="Занятие для цели"></select><input id="goalHours" type="number" min="0.5" step="0.5" value="3" aria-label="Часов в неделю"><button class="btn primary" id="saveGoal">Добавить</button></div><div id="goals"></div></section>
 <section class="card calendar-card"><div class="card-head"><div><h2 class="cardtitle">Календарь</h2><div class="sub">Ваши активные дни</div></div><div class="mini-nav"><button class="iconbtn" id="calPrev" aria-label="Предыдущий месяц"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button><button class="iconbtn" id="calNext" aria-label="Следующий месяц"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button></div></div><div class="calendar-title" id="calMonth"></div><div class="calgrid" id="calendar"></div><div class="cal-legend"><span>Меньше</span><i class="cal-swatch"></i><i class="cal-swatch l2"></i><i class="cal-swatch l3"></i><span>Больше</span><span class="cal-selected-key"><i></i> Выбранный день</span></div></section>
@@ -674,8 +718,64 @@ function goalStatusText(targetMinutes,minutes,weekFrom){
  if(st.state==='at-risk')return {state:'at-risk',text:T('Можно не успеть: нужно ещё {time} {when}',{time:hm(st.remaining),when})};
  return null;
 }
+// Week in review: the card shows last week in one line, the popup the whole week, with
+// arrows to earlier weeks. Needs stats.js with weekReview; an older copy just hides the card.
+let reviewWeek=null;
+function weekRangeText(from,to,month='long'){const a=parse(from),b=parse(to);return from.slice(0,7)===to.slice(0,7)?`${a.getDate()}–${fmtDate(b,{day:'numeric',month})}`:`${fmtDate(a,{day:'numeric',month})} – ${fmtDate(b,{day:'numeric',month})}`}
+function firstEntryDate(){return data.reduce((first,x)=>!first||x.date<first?x.date:first,null)}
+function renderWeekCard(){
+ const card=$('#weekCard'),first=firstEntryDate();
+ card.hidden=!StatsLogic.weekReview||!first;
+ if(card.hidden)return;
+ const lastWeek=StatsLogic.previousWeekStart(iso(new Date())),thisWeek=parse(lastWeek);thisWeek.setDate(thisWeek.getDate()+7);
+ // Shown once there is anything from before this week.
+ card.hidden=first>=iso(thisWeek);
+ if(card.hidden)return;
+ const r=StatsLogic.weekReview({ref:lastWeek,entries:data,goals});
+ const parts=[weekRangeText(r.from,r.to,'short')];
+ if(!r.total)parts.push(T('записей не было'));
+ else{parts.push(hm(r.total));if(r.goals.length)parts.push(T('целей: {done} из {all}',{done:r.goalsDone,all:r.goals.length}))}
+ $('#weekCardLine').textContent=parts.join(' · ');
+ if($('#weekDialog').open)renderWeekDialog();
+}
+function weekChange(now,before,capital){
+ const diff=now-before,t=s=>capital?s[0].toUpperCase()+s.slice(1):s;
+ if(!before)return {text:t(T('неделей раньше записей не было')),icon:null};
+ if(!diff)return {text:t(T('столько же, сколько неделей раньше')),icon:null};
+ return {text:t(T(diff>0?'на {time} больше, чем неделей раньше':'на {time} меньше, чем неделей раньше',{time:hm(Math.abs(diff))})),icon:diff>0?'up':'down'};
+}
+function renderWeekDialog(){
+ const today=iso(new Date()),lastWeek=StatsLogic.previousWeekStart(today);
+ const r=StatsLogic.weekReview({ref:reviewWeek,entries:data,goals});
+ const weeksAgo=Math.round((parse(lastWeek)-parse(r.from))/(7*864e5))+1;
+ $('#weekWhen').textContent=weeksAgo===1?T('Прошлая неделя'):weeksAgo===2?T('Позапрошлая неделя'):T(plural(weeksAgo,'{n} неделю назад','{n} недели назад','{n} недель назад'),{n:weeksAgo});
+ $('#weekRange').textContent=weekRangeText(r.from,r.to);
+ const first=firstEntryDate();
+ $('#weekPrev').disabled=!first||first>=r.from;
+ $('#weekNext').disabled=r.from>=lastWeek;
+ if(!r.total&&!r.goals.length){$('#weekBody').innerHTML=`<p class="week-verdict empty">${T('На этой неделе записей не было.')}</p>`;return}
+ const allDone=r.goals.length&&r.goalsDone===r.goals.length;
+ const verdict=!r.total?T('На этой неделе записей не было.'):allDone?T('Все цели выполнены — отличная неделя!'):r.goalsDone?T('Выполнено целей: {done} из {all}. Хороший результат!',{done:r.goalsDone,all:r.goals.length}):r.goals.length?T('Цели в этот раз не набрались, но {time} — тоже результат.',{time:hm(r.total)}):T('{time} на свои занятия за неделю.',{time:hm(r.total)});
+ const change=weekChange(r.total,r.previousTotal,true);
+ const max=Math.max(...r.days.map(d=>d.minutes),1);
+ const days=r.days.map((d,i)=>`<div class="week-day ${d.minutes?'':'none'} ${r.bestDay?.date===d.date?'best':''}" title="${esc(fmtDate(parse(d.date),{weekday:'long',day:'numeric',month:'long'}))}: ${d.minutes?hm(d.minutes):T('нет записей')}"><i style="height:${d.minutes?Math.max(4,d.minutes/max*64):3}px"></i>${WEEKDAYS_SHORT[i]}</div>`).join('');
+ const third=r.goals.length?`<div class="stat"><b>${T('{n} из {all}',{n:r.goalsDone,all:r.goals.length})}</b><span>${T('целей выполнено')}</span></div>`:`<div class="stat"><b>${r.sessions}</b><span>${plural(r.sessions,'занятие','занятия','занятий')}</span></div>`;
+ const goalRows=r.goals.map(g=>{const pct=g.minutes/g.targetMinutes*100;return `<div class="goal-item has-status ${g.done?'done':'missed'}"><div class="goal-ring" style="--p:${Math.min(100,pct)};--goal-color:${color(g.type)}"><span>${Math.round(pct)}%</span></div><div class="goal-info"><div class="goal-name">${esc(g.type)}</div><div class="goal-hours">${T('{got} из {target} ч',{got:fmtHours(g.minutes/60),target:fmtHours(g.targetMinutes/60)})}</div><div class="goal-status">${g.done?T('Цель выполнена!'):T('Не хватило {time}',{time:hm(g.missing)})}</div></div></div>`}).join('');
+ const top=Math.max(...r.activities.map(a=>a.minutes),1);
+ const actRows=r.activities.map(a=>{const ch=weekChange(a.minutes,a.previousMinutes,false);return `<div class="week-act"><div class="week-act-top"><span class="breakname"><i class="dot" style="background:${color(a.type)}"></i>${esc(a.type)}</span><span class="breakhrs">${hm(a.minutes)} · ${Math.round(a.minutes/r.total*100)}%</span></div><span class="track"><span class="fill" style="display:block;width:${a.minutes/top*100}%;background:${color(a.type)}"></span></span><div class="week-act-meta">${[`${a.sessions} ${plural(a.sessions,'занятие','занятия','занятий')}`,T(plural(a.days,'{n} день','{n} дня','{n} дней'),{n:a.days}),ch.text].join(' · ')}</div></div>`}).join('');
+ $('#weekBody').innerHTML=`<p class="week-verdict ${!r.total?'empty':allDone?'done':''}">${esc(verdict)}</p>`+
+  (r.total?`<div class="stats week-stats"><div class="stat"><b>${hm(r.total)}</b><span>${T('всего времени')}</span></div><div class="stat"><b>${T('{n} из {all}',{n:r.activeDays,all:7})}</b><span>${T('дней с занятиями')}</span></div>${third}</div><p class="comparison">${change.icon?ic(change.icon):''}<span>${esc(change.text)}</span></p><div class="week-days" aria-hidden="true">${days}</div>${r.bestDay&&r.activeDays>1?`<p class="week-best">${T('Лучший день: <strong>{day}</strong>, {time}.',{day:esc(fmtDate(parse(r.bestDay.date),{weekday:'long',day:'numeric',month:'long'})),time:hm(r.bestDay.minutes)})}</p>`:''}`:'')+
+  (r.goals.length?`<h3 class="week-section">${T('Цели')}</h3>${goalRows}`:'')+
+  (r.activities.length?`<h3 class="week-section">${T('Занятия')}</h3>${actRows}`:'')+
+  (r.goals.length?`<p class="week-note">${T('Цели сравниваются с теми, что заданы сейчас.')}</p>`:'');
+}
+function openWeekReview(){reviewWeek=StatsLogic.previousWeekStart(iso(new Date()));renderWeekDialog();$('#weekDialog').showModal()}
+function moveReviewWeek(step){const d=parse(reviewWeek);d.setDate(d.getDate()+7*step);reviewWeek=iso(d);renderWeekDialog()}
+$('#weekCard').onclick=openWeekReview;$('#weekClose').onclick=()=>$('#weekDialog').close();
+$('#weekPrev').onclick=()=>moveReviewWeek(-1);$('#weekNext').onclick=()=>moveReviewWeek(1);
+$('#weekDialog').addEventListener('click',e=>{if(e.target===$('#weekDialog'))$('#weekDialog').close()});
 function renderExtras(){
- renderDaySummary();renderBackupNote();
+ renderDaySummary();renderBackupNote();renderWeekCard();
  const monthStart=new Date(calDate.getFullYear(),calDate.getMonth(),1), offset=(monthStart.getDay()+6)%7, daysIn=new Date(calDate.getFullYear(),calDate.getMonth()+1,0).getDate(), prevCount=new Date(calDate.getFullYear(),calDate.getMonth(),0).getDate();
  $('#calMonth').textContent=fmtDate(calDate,{month:'long',year:'numeric'});
  const sums={};data.forEach(x=>sums[x.date]=(sums[x.date]||0)+x.minutes);const max=Math.max(...Object.values(sums),1);let cells=WEEKDAYS_SHORT.map(x=>`<div class="calweekday">${x}</div>`).join('');
