@@ -182,3 +182,24 @@ test('a cleared highlight stays cleared against an older copy', () => {
 test('data without highlights merges to an empty set', () => {
   assert.deepEqual(mergeStates({}, null).highlights, {});
 });
+
+test('the newest goal order wins and follows renames', () => {
+  const local = { goals: { a: 1, b: 2, c: 3 }, goalOrder: { updatedAt: 300, names: ['c', 'a', 'b'] } };
+  const remote = { goals: { a: 1, b: 2, c: 3 }, goalOrder: { updatedAt: 200, names: ['a', 'b', 'c'] } };
+  assert.deepEqual(mergeStates(local, remote).goalOrder.names, ['c', 'a', 'b']);
+  assert.deepEqual(mergeStates(remote, local).goalOrder.names, ['c', 'a', 'b']);
+  const renamed = mergeStates(
+    { goals: { a: 1, 'книги': 2 }, goalOrder: { updatedAt: 100, names: ['чтение', 'a'] }, typeChanges: { 'чтение': { updatedAt: 150, deleted: true, renamedTo: 'книги' }, 'книги': { updatedAt: 150, deleted: false, color: '#1' } } },
+    {},
+  );
+  assert.deepEqual(renamed.goalOrder.names, ['книги', 'a']);
+});
+
+test('goal order drops deleted goals, adds new ones at the end, and is absent for old data', () => {
+  const merged = mergeStates(
+    { goals: { a: 1, d: 4 }, goalOrder: { updatedAt: 100, names: ['b', 'a'] } },
+    { goals: { a: 1 }, deletedGoals: ['b'] },
+  );
+  assert.deepEqual(merged.goalOrder.names, ['a', 'd']);
+  assert.equal(mergeStates({ goals: { a: 1 } }, { goals: { b: 2 } }).goalOrder, undefined);
+});

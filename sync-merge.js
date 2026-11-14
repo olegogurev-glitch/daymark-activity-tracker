@@ -114,6 +114,21 @@
     return { updatedAt: stamp(winner), names };
   }
 
+  // Goals keep the order the user dragged them into; the most recently saved order wins.
+  // Goals it does not mention go at the end. Older data has no order, so none is invented.
+  function mergeGoalOrder(local, remote, goals, changes) {
+    const l = local.goalOrder;
+    const r = remote.goalOrder;
+    if (!l && !r) return null;
+    const winner = l && (!r || stamp(l) > stamp(r)) ? l : r;
+    const names = [];
+    for (const raw of [...(winner.names || []), ...((r && r.names) || []), ...((l && l.names) || []), ...Object.keys(goals)]) {
+      const name = resolveType(raw, changes);
+      if (goals[name] !== undefined && !names.includes(name)) names.push(name);
+    }
+    return { updatedAt: stamp(winner), names };
+  }
+
   // Several timers can run at once. `timers` maps each timer's id to its newest state; a
   // stopped timer leaves { id, updatedAt, stopped: true } so an older copy can't restart it.
   // Stopped records older than this, next to the newest change, are dropped.
@@ -181,10 +196,13 @@
     const typeChanges = mergeTypeChanges(typeChangesOf(local), typeChangesOf(remote));
     const typeOrder = mergeTypeOrder(local, remote, typeChanges);
     const timers = mergeTimers(local, remote, typeChanges);
+    const goalPart = mergeGoals(local, remote, typeChanges);
+    const goalOrder = mergeGoalOrder(local, remote, goalPart.goals, typeChanges);
     return {
       v: 2,
       ...mergeActivities(local, remote, typeChanges),
-      ...mergeGoals(local, remote, typeChanges),
+      ...goalPart,
+      ...(goalOrder ? { goalOrder } : {}),
       types: typeOrder.names.map((name) => [name, typeChanges[name].color]),
       hidden: typeOrder.names.filter((name) => typeChanges[name].hidden),
       deletedTypes: Object.keys(typeChanges).filter((name) => typeChanges[name].deleted),
